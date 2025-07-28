@@ -110,7 +110,7 @@
 .shop-now-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(101, 255, 5, 0.6);
-  background: linear-gradient(135deg, #ff5252, #ff7b47);
+  background-color: #1a936f;
 }
 
 .shop-now-btn .arrow {
