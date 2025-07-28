@@ -5,19 +5,19 @@ function ImageSlider() {
   const slides = [
     {
       image: 'https://www.worldbank.org/content/dam/photos/780x439/2021/apr-2/coffee-cherries.jpg',
-      title: 'iPhone 16 Pro',
-      subtitle: 'The ultimate professional camera system',
+      title: 'Coffe in Ethiopia',
+      subtitle: 'Exotic',
       description: 'Experience revolutionary computational photography'
     },
     {
       image: 'https://african.land/oc-content/plugins/blog/img/blog/607.jpg',
-      title: 'MacBook Pro',
+      title: 'Maize in Kenya',
       subtitle: 'Supercharged for pros',
       description: 'Next-level performance with M3 Pro and M3 Max chips'
     },
     {
       image: 'https://socaa.or.ke/wp-content/uploads/2013/08/dummy3.jpg',
-      title: 'Wireless Earbuds',
+      title: 'Sisal in Kenya ',
       subtitle: 'Premium sound quality',
       description: 'Noise cancellation with crystal clear audio'
     }
