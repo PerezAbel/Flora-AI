@@ -5,20 +5,20 @@ function ImageSlider() {
   const slides = [
     {
       image: 'https://www.worldbank.org/content/dam/photos/780x439/2021/apr-2/coffee-cherries.jpg',
-      title: 'Coffe in Ethipia',
-      subtitle: 'Exotic, Natural Refreshing',
-      description: 'The leading producer in Africa'
+      title: 'iPhone 16 Pro',
+      subtitle: 'The ultimate professional camera system',
+      description: 'Experience revolutionary computational photography'
     },
     {
       image: 'https://african.land/oc-content/plugins/blog/img/blog/607.jpg',
-      title: 'Maize In Kenya',
-      subtitle: 'Planted and raised by dedicated farmers',
-      description: 'The leading producer in East Africas'
+      title: 'MacBook Pro',
+      subtitle: 'Supercharged for pros',
+      description: 'Next-level performance with M3 Pro and M3 Max chips'
     },
     {
       image: 'https://socaa.or.ke/wp-content/uploads/2013/08/dummy3.jpg',
-      title: 'The Farmers Federation',
-      subtitle: 'A group of Motivated farmers to improve their techniques',
+      title: 'Wireless Earbuds',
+      subtitle: 'Premium sound quality',
       description: 'Noise cancellation with crystal clear audio'
     }
   ];
@@ -71,7 +71,7 @@ function ImageSlider() {
                 <h2 className="slide-title">{slide.title}</h2>
                 <p className="slide-description">{slide.description}</p>
                 <button className="shop-now-btn">
-                  Learn More <span className="arrow">→</span>
+                  Shop Now <span className="arrow">→</span>
                 </button>
               </div>
             </div>
@@ -104,4 +104,4 @@ function ImageSlider() {
   );
 }
 
-export default ImageSlider;
+export default ImageSlider; 

@@ -1,16 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
-  
+
 .slider-container {   
   position: relative;
-  border-radius: 20px;    
-  margin-top: 50px;
-  width: 1800px;
+  border-radius: 20px;   
+  width: 90%;
+  max-width: 1800px;
   height: 90vh;
   max-height: 700px; 
-  margin: 50px auto 0; /* This adds 50px space only at the top */
+  margin: 50px auto 0;
   overflow: hidden;
   font-family: 'Poppins', sans-serif;
 }
+
 .slider {
   display: flex;
   height: 100%;
@@ -93,7 +94,7 @@
 
 .shop-now-btn {
   padding: 18px 40px;
-    background: linear-gradient(90deg, #0a4a1e, #1a936f);
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
   color: white;
   border: none;
   border-radius: 30px;
@@ -108,8 +109,8 @@
 
 .shop-now-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(154, 255, 107, 0.6);
-  background-color: #1a936f;
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+  background: linear-gradient(135deg, #ff5252, #ff7b47);
 }
 
 .shop-now-btn .arrow {
@@ -197,55 +198,52 @@
   }
 }
 
-/* Existing styles remain exactly the same until the media queries */
-/* ... all your current styles ... */
-
-/* Mobile Responsiveness Additions */
-@media (max-width: 1800px) {
+/* Responsive styles */
+@media (max-width: 1200px) {
   .slider-container {
-    width: 100%;
-    max-width: 1800px;
-    padding: 0 20px;
-    box-sizing: border-box;
+    height: 80vh;
   }
 }
 
 @media (max-width: 1024px) {
-  .slider-container {
-    height: 80vh;
-  }
-  
   .slide-title {
-    font-size: 3.5rem;
+    font-size: 3rem;
   }
   
   .slide-subtitle {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
   }
   
   .slide-description {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
 }
 
 @media (max-width: 768px) {
   .slider-container {
-    height: 70vh;
-    border-radius: 15px;
+    height: 60vh;
+    width: 95%;
+    margin-top: 30px;
   }
   
   .slide-title {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
   }
   
   .slide-subtitle {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     letter-spacing: 2px;
   }
   
   .slide-description {
-    font-size: 1.1rem;
-    max-width: 85%;
+    font-size: 1rem;
+    max-width: 90%;
+    margin: 1rem auto 2rem;
+  }
+  
+  .shop-now-btn {
+    padding: 15px 30px;
+    font-size: 1rem;
   }
   
   .slider-btn {
@@ -257,29 +255,39 @@
     width: 24px;
     height: 24px;
   }
+  
+  .prev {
+    left: 15px;
+  }
+  
+  .next {
+    right: 15px;
+  }
+  
+  .slider-dots {
+    bottom: 20px;
+  }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 480px) {
   .slider-container {
-    height: 60vh;
-    margin: 30px auto 0;
+    height: 50vh;
+    margin-top: 20px;
     border-radius: 10px;
   }
   
   .slide-title {
-    font-size: 2rem;
-    margin: 0.3rem 0;
+    font-size: 1.8rem;
   }
   
   .slide-subtitle {
-    font-size: 1rem;
-    letter-spacing: 1px;
+    font-size: 0.9rem;
   }
   
   .slide-description {
     font-size: 0.9rem;
-    margin: 1rem auto 1.5rem;
-    max-width: 90%;
+    margin: 0.8rem auto 1.5rem;
+    line-height: 1.4;
   }
   
   .shop-now-btn {
@@ -297,43 +305,8 @@
     height: 20px;
   }
   
-  .prev {
-    left: 10px;
-  }
-  
-  .next {
-    right: 10px;
-  }
-  
-  .slider-dots {
-    bottom: 15px;
-  }
-  
   .dot {
     width: 10px;
     height: 10px;
-  }
-}
-
-@media (max-width: 400px) {
-  .slider-container {
-    height: 50vh;
-  }
-  
-  .slide-title {
-    font-size: 1.6rem;
-  }
-  
-  .slide-subtitle {
-    font-size: 0.9rem;
-  }
-  
-  .slide-description {
-    font-size: 0.8rem;
-  }
-  
-  .shop-now-btn {
-    padding: 10px 20px;
-    font-size: 0.8rem;
   }
 }
