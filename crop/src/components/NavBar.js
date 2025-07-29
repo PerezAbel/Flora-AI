@@ -56,7 +56,7 @@ function NavBar() {
           alt="AgriNova Logo" 
           className="nav-logo-img" 
         />
-        <Link to="/" className="nav-logo">AgriNova</Link>
+        <Link to="/ai" className="nav-logo">AgriNova</Link>
       </div>
 
       <div className="nav-center">
