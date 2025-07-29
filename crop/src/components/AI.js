@@ -31,7 +31,7 @@ function SellDevice() {
   const faqs = [
     {
       question: "How does the AI assistant work?",
-      answer: "Our AI uses advanced natural language processing to understand your queries about electronics and provide accurate responses."
+      answer: "Our AI uses advanced natural language processing to understand your queries about the best geographical locations and conditions to grow the users crop of interest."
     },
     // {
     //   question: "What crops can I sell through this platform?",
