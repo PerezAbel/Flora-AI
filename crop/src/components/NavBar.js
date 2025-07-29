@@ -60,9 +60,9 @@ function NavBar() {
       </div>
 
       <div className="nav-center">
-        <Link to="/home" className="nav-link">
+        {/* <Link to="/home" className="nav-link">
           <FontAwesomeIcon icon={faHome} /> {!isMobile && 'Home'}
-        </Link>   
+        </Link>    */}
 
         {/* <div 
           className="nav-link"
@@ -103,11 +103,11 @@ function NavBar() {
           <FontAwesomeIcon icon={faShoppingCart} />
         </Link>
          */}
-        <div 
+        {/* <div 
           className="nav-icon-button profile-dropdown-trigger"
           onClick={() => setShowProfile(!showProfile)}
-        >
-          <FontAwesomeIcon icon={faUser} />
+        > */}
+          {/* <FontAwesomeIcon icon={faUser} />
           {showProfile && (
             <div className="profile-dropdown">
               <Link to="/login" className="dropdown-item">
@@ -115,16 +115,16 @@ function NavBar() {
               </Link>
               <Link to="/register" className="dropdown-item">
                 <FontAwesomeIcon icon={faUserPlus} /> Join Us
-              </Link>
+              </Link> */}
               {/* <Link to="/wishlist" className="dropdown-item">
                 <FontAwesomeIcon icon={faStar} /> Wish List
               </Link>
               <Link to="/orders" className="dropdown-item">
                 <FontAwesomeIcon icon={faTruck} /> Deliveries
               </Link> */}
-            </div>
-          )}
-        </div>
+            {/* </div> */}
+          {/* )} */}
+        {/* </div> */}
       </div>
     </nav>
   );

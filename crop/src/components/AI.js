@@ -33,14 +33,14 @@ function SellDevice() {
       question: "How does the AI assistant work?",
       answer: "Our AI uses advanced natural language processing to understand your queries about electronics and provide accurate responses."
     },
-    {
-      question: "What devices can I sell through this platform?",
-      answer: "You can sell smartphones, laptops, tablets, gaming consoles, and other consumer electronics in good condition."
-    },
-    {
-      question: "How is the pricing determined?",
-      answer: "Our AI analyzes market trends, device condition, and specifications to suggest fair market prices."
-    },
+    // {
+    //   question: "What crops can I sell through this platform?",
+    //   answer: "Oranges, Cabbage."
+    // },
+    // {
+    //   question: "How is the pricing determined?",
+    //   answer: "Our AI analyzes market trends, device condition, and specifications to suggest fair market prices."
+    // },
     {
       question: "Is my conversation with the AI secure?",
       answer: "Yes, all communications are encrypted and we don't store personal data without your consent."
@@ -66,7 +66,7 @@ function SellDevice() {
       <div className="ai-assistant-content">
         {/* Page Title */}
         <div className="ai-title-container">
-          <h1 className="ai-title">NibbleStore Assistant</h1>
+          <h1 className="ai-title"> Agri Nova Assistant</h1>
           <div className="title-divider"></div>
         </div>
 
@@ -85,7 +85,7 @@ function SellDevice() {
         </div>
 
         {/* Voice Controls */}
-        <div className="voice-controls">
+        {/* <div className="voice-controls">
           <button 
             className={`voice-btn start-btn ${isListening ? 'active' : ''}`}
             onClick={() => setIsListening(true)}
@@ -99,7 +99,7 @@ function SellDevice() {
           >
             <FaStop /> End Conversation
           </button>
-        </div>
+        </div> */}
 
         {/* Chat with Agent */}
         <div className="chat-with-agent">

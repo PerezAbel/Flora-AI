@@ -6,9 +6,6 @@ import NewsLetter from './NewsLetter';
 
 
        
-
-    
-
 const Home = () => {
     return (   
         <div className="Home">     

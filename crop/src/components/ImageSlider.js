@@ -7,7 +7,7 @@ function ImageSlider() {
       image: 'https://www.worldbank.org/content/dam/photos/780x439/2021/apr-2/coffee-cherries.jpg',
       title: 'Coffe in Ethiopia',
       subtitle: 'Exotic',
-      description: 'Experience revolutionary computational photography'
+      description: 'bnExperience revolutionary computational photography'
     },
     {
       image: 'https://african.land/oc-content/plugins/blog/img/blog/607.jpg',
