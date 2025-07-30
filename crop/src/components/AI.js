@@ -9,7 +9,7 @@ const CropAI = () => {
     { type: 'bot', text: 'Hello! I can recommend crops based on soil and climate conditions. Try asking about temperature ranges (high/low), humidity levels, rainfall amounts, or soil pH.' }
   ]);
 
-  // Complete crop dataset
+  // test data from the dataset
   const cropData = [
     { N: 81, P: 53, K: 42, temperature: 23.68, humidity: 81.04, ph: 5.18, rainfall: 233.70, label: "rice" },
     { N: 71, P: 54, K: 16, temperature: 22.61, humidity: 63.69, ph: 5.75, rainfall: 87.76, label: "maize" },
@@ -179,7 +179,7 @@ const CropAI = () => {
 
     // Soil pH queries
     if (lowerInput.includes('ph') || lowerInput.includes('soil')) {
-      const ph = numbers.find(n => n > 3 && n < 9);
+      const ph = numbers.find(n => n < 3 && n > 9);
       if (ph) {
         const crops = findClosestCrops('ph', ph);
         let response = `For pH ${ph} soil:\n`;
