@@ -366,4 +366,106 @@ const CropAI = () => {
   );
 };
 
-export default CropAI;
+export default CropAI;  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { InferenceSession } from 'onnxruntime-web';
+
+// // Add this inside your CropAI component, before the handleSendMessage function
+// const [modelLoaded, setModelLoaded] = useState(false);
+// const [session, setSession] = useState(null);
+
+// // Add this useEffect hook to load the model when component mounts
+// useEffect(() => {
+//   const loadModel = async () => {
+//     try {
+//       // Replace with your actual ONNX model URL
+//       const modelUrl = '/path/to/your/model.onnx';
+      
+//       // Create inference session
+//       const inferenceSession = await InferenceSession.create(modelUrl);
+//       setSession(inferenceSession);
+//       setModelLoaded(true);
+      
+//       // Add a message to chat when model is ready
+//       setChatMessages(prev => [...prev, { 
+//         type: 'bot', 
+//         text: 'Advanced crop prediction model loaded and ready! You can now get more accurate recommendations.' 
+//       }]);
+//     } catch (error) {
+//       console.error('Failed to load ONNX model:', error);
+//       setChatMessages(prev => [...prev, { 
+//         type: 'bot', 
+//         text: 'Basic mode: Using simple recommendations. Advanced model failed to load.' 
+//       }]);
+//     }
+//   };
+
+//   loadModel();
+// }, []);
+
+// // Example function to use the loaded model
+// const predictWithModel = async (inputFeatures) => {
+//   if (!session) {
+//     return null;
+//   }
+
+//   try {
+//     // Prepare input - adjust based on your model's expected input format
+//     const feeds = {
+//       input: new ort.Tensor('float32', inputFeatures, [1, inputFeatures.length])
+//     };
+
+//     // Run inference
+//     const results = await session.run(feeds);
+//     const output = results.output.data;
+    
+//     // Process output - this depends on your model's output format
+//     return output;
+//   } catch (error) {
+//     console.error('Inference failed:', error);
+//     return null;
+//   }
+// };
+
+// // Then modify your generateAIResponse to use the model when available
+// const generateAIResponse = async (input) => {
+//   // ... existing code ...
+  
+//   // Example of using the model for a specific query
+//   if (modelLoaded && numbers.length >= 4 && 
+//       (lowerInput.includes('predict') || lowerInput.includes('model'))) {
+//     // Extract features from input - this is just an example
+//     const features = [
+//       numbers[0] || 0,  // N
+//       numbers[1] || 0,  // P
+//       numbers[2] || 0,  // K
+//       numbers[3] || 0,  // temperature
+//       numbers[4] || 50, // humidity
+//       numbers[5] || 6,  // ph
+//       numbers[6] || 100 // rainfall
+//     ];
+    
+//     const prediction = await predictWithModel(features);
+//     if (prediction) {
+//       // Process prediction results
+//       return `Model prediction: ${prediction}`;
+//     }
+//   }
+  
+//   // ... rest of your existing code ...
+// };

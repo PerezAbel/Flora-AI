@@ -60,11 +60,11 @@ function NavBar() {
       </div>
 
       <div className="nav-center">
-        {/* <Link to="/home" className="nav-link">
+        <Link to="/home" className="nav-link">
           <FontAwesomeIcon icon={faHome} /> {!isMobile && 'Home'}
-        </Link>    */}
+        </Link>   
 
-        {/* <div 
+        <div
           className="nav-link"
           onMouseEnter={() => !isMobile && setShowProducts(true)}
           onMouseLeave={() => !isMobile && setShowProducts(false)}
@@ -87,27 +87,27 @@ function NavBar() {
               ))}
             </div>
           )}
-        </div> */}
+        </div> 
         
-        {/* <Link to="/market" className="nav-link">
+        <Link to="/market" className="nav-link">
           <FontAwesomeIcon icon={faChartLine} /> {!isMobile && 'Market Data'}
         </Link>
-         */}
+        
         <Link to="/ai" className="nav-link">
           <FontAwesomeIcon icon={faTractor} /> {!isMobile && 'Farm Assistant'}
         </Link>
       </div>
 
       <div className="nav-right">
-        {/* <Link to="/cart" className="nav-icon-button">
+        <Link to="/cart" className="nav-icon-button">
           <FontAwesomeIcon icon={faShoppingCart} />
         </Link>
-         */}
-        {/* <div 
+      
+         <div 
           className="nav-icon-button profile-dropdown-trigger"
           onClick={() => setShowProfile(!showProfile)}
-        > */}
-          {/* <FontAwesomeIcon icon={faUser} />
+        > 
+           <FontAwesomeIcon icon={faUser} />
           {showProfile && (
             <div className="profile-dropdown">
               <Link to="/login" className="dropdown-item">
@@ -115,16 +115,16 @@ function NavBar() {
               </Link>
               <Link to="/register" className="dropdown-item">
                 <FontAwesomeIcon icon={faUserPlus} /> Join Us
-              </Link> */}
-              {/* <Link to="/wishlist" className="dropdown-item">
+              </Link> 
+               <Link to="/wishlist" className="dropdown-item">
                 <FontAwesomeIcon icon={faStar} /> Wish List
               </Link>
               <Link to="/orders" className="dropdown-item">
                 <FontAwesomeIcon icon={faTruck} /> Deliveries
-              </Link> */}
-            {/* </div> */}
-          {/* )} */}
-        {/* </div> */}
+              </Link> 
+            </div>
+          )}
+         </div>
       </div>
     </nav>
   );

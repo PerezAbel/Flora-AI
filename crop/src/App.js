@@ -12,15 +12,15 @@ function App() {
     <Router>
       <div className="App">   
         <NavBar />  
-        {/* <ChatBot />    */}
+        <ChatBot />   
 
         <Routes>
           <Route path="/home" element={<Home />} /> 
           <Route path="/AI" element={<AI />} /> 
-          {/* Add other routes here as needed */}
+   
         </Routes>   
 
-        {/* <Footer />    */}
+        <Footer />   
       </div>
     </Router>
   );
