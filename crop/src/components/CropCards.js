@@ -26,8 +26,7 @@ function CropCards() {
       "id": "1",
       "Title": "Maize", 
       "Cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMsEmRSyboh_6zXw0360HDXOpo4ckNlxySMw&s",
-      "Price": "KSh 5,000/bag",
-      "Description": "Staple food crop grown widely across Kenya. Requires moderate rainfall and well-drained soils."
+      
     },
     {
       "id": "2",
@@ -71,29 +70,25 @@ function CropCards() {
       "id": "7",
       "Title": "Spider Plant",
       "Cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWSOa4muR_rKo9qJ36fjkFfP7fsrTT5L2tIw&s",
-      "Price": "KSh 150/bunch",
-      "Description": "Traditional vegetable rich in iron and vitamins. Thrives in various conditions."
+
     },
     {
       "id": "8",
       "Title": "Black Nightshade",
       "Cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEkyQMFCYHPapj410onMLwWS2rpecCId3iaA&s",
-      "Price": "KSh 180/bunch",
-      "Description": "Nutritious leafy vegetable with medicinal properties. Grows wild or cultivated."
+   
     },
     {
       "id": "9",
       "Title": "Cowpeas",
       "Cover": "https://stickingupforlife.com/wp-content/uploads/2020/12/cowpeas-and-flower-zone-9b.jpg",
-      "Price": "KSh 250/bunch",
-      "Description": "Drought-tolerant legume. Leaves and pods are both edible and nutritious."
+     
     },
     {
       "id": "10",
       "Title": "Pumpkin Leaves",
       "Cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1196WCvij9Ci8SZfxoeS8YpuxFvNqOvYzSA&s",
-      "Price": "KSh 120/bunch",
-      "Description": "Versatile vegetable rich in vitamins. Grows well with pumpkin vines."
+    
     }
   ];
 
@@ -102,36 +97,30 @@ function CropCards() {
       "id": "11",
       "Title": "Avocado", 
       "Cover": "https://upload.wikimedia.org/wikipedia/commons/f/f2/Persea_americana_fruit_2.JPG",
-      "Price": "KSh 50/piece",
-      "Description": "Nutrient-dense fruit. Grows well in high and medium altitude areas."
+    
     },
     {
       "id": "12",
-      "Title": "Mango",
-      "Cover": "https://www.greenlife.co.ke/wp-content/uploads/2022/04/Mangoes.jpg",
-      "Price": "KSh 30/piece",
-      "Description": "Tropical fruit tree. Does well in warm, frost-free regions."
+     
+     
     },
     {
       "id": "13",
       "Title": "Passion Fruit",
       "Cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQG0xZPV3A2pBnIuklPi22Mc0c7LGoysyPrBw&s",
-      "Price": "KSh 100/kg",
-      "Description": "Vine fruit with high market demand. Requires support structures."
+ 
     },
     {
       "id": "14",
       "Title": "Macadamia",
       "Cover": "https://gardenerspath.com/wp-content/uploads/2019/06/How-to-Grow-and-Care-for-a-Macadamia-Nut-Tree-Featured.jpg",
-      "Price": "KSh 800/kg",
-      "Description": "High-value nut crop. Grows well in high rainfall areas."
+      
     },
     {
       "id": "15",
       "Title": "Coffee",
       "Cover": "https://www.aboutcoffee.org/wp-content/uploads/2024/10/ripe-coffee-cherries-on-branch-of-coffee-tree-1024x576.jpg",
-      "Price": "KSh 1,200/kg",
-      "Description": "Cash crop for export. Requires specific altitude and climate conditions."
+      
     }
   ];
 
