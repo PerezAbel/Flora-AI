@@ -1,23 +1,26 @@
+import { useLanguage } from '@/contexts/language-context';
 import { FontAwesome } from '@expo/vector-icons';
-import AppTopBar from '@/components/app-top-bar';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function LandingPage() {
+  const { tr } = useLanguage();
+
   return (
     <View style={styles.screen}>
-      <AppTopBar />
+      <View style={styles.bgTop} />
+      <View style={styles.bgBottom} />
       <View style={styles.center}>
-        <FontAwesome color="#2A6A4A" name="leaf" size={58} />
-        <Text style={styles.brand}>Flora AI</Text>
-        <Text style={styles.subtitle}>Your Reliable AI Farm Assistant</Text>
-        <Text style={styles.helper}>Get started with me</Text>
+        <View style={styles.avatarWrap}>
+          <FontAwesome color="#EAF2FF" name="user" size={34} />
+        </View>
+        <Text style={styles.brand}>{tr('Flora AI')}</Text>
+        <Text style={styles.subtitle}>{tr('Your Smart AI farm Assistant')}</Text>
         <Pressable onPress={() => router.push('/signup')} style={styles.primaryBtn}>
-          <Text style={styles.primaryText}>Sign Up</Text>
+          <Text style={styles.primaryText}>{tr('Get Started')}</Text>
         </Pressable>
-        <Text style={styles.small}>Don&apos;t have an account yet?</Text>
         <Pressable onPress={() => router.push('/login')}>
-          <Text style={styles.link}>Log In</Text>
+          <Text style={styles.link}>{tr('Already have an account? Log In')}</Text>
         </Pressable>
       </View>
     </View>
@@ -26,53 +29,68 @@ export default function LandingPage() {
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: '#F8FFF9',
+    backgroundColor: '#04112B',
     flex: 1,
-    padding: 18,
+  },
+  bgTop: {
+    backgroundColor: '#061A43',
+    bottom: '45%',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  bgBottom: {
+    backgroundColor: '#071026',
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: '55%',
   },
   center: {
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  avatarWrap: {
+    alignItems: 'center',
+    backgroundColor: '#DCE7FB',
+    borderRadius: 42,
+    height: 84,
+    justifyContent: 'center',
+    marginBottom: 18,
+    width: 84,
   },
   brand: {
-    color: '#123524',
-    fontSize: 32,
-    fontWeight: '900',
-    marginTop: 8,
+    color: '#F2F7FF',
+    fontSize: 29,
+    fontWeight: '800',
   },
   subtitle: {
-    color: '#244433',
-    fontSize: 18,
-    fontWeight: '700',
-    marginTop: 18,
+    color: '#AFC4E8',
+    fontSize: 13,
+    marginTop: 5,
     textAlign: 'center',
   },
-  helper: {
-    color: '#577161',
-    fontSize: 15,
-    marginTop: 6,
-  },
   primaryBtn: {
-    backgroundColor: '#2A6A4A',
-    borderRadius: 12,
-    marginTop: 24,
-    paddingHorizontal: 28,
+    backgroundColor: '#1D4ED8',
+    borderRadius: 999,
+    marginTop: 22,
+    minWidth: 190,
     paddingVertical: 12,
   },
   primaryText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
-  },
-  small: {
-    color: '#486252',
-    marginTop: 18,
+    textAlign: 'center',
   },
   link: {
-    color: '#2A6A4A',
-    fontSize: 15,
-    fontWeight: '700',
-    marginTop: 8,
+    color: '#B8CCE9',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 12,
   },
 });

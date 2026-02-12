@@ -1,21 +1,28 @@
-import AppTopBar from '@/components/app-top-bar';
+import { useLanguage } from '@/contexts/language-context';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function SignupPage() {
+  const { tr } = useLanguage();
+
   return (
     <View style={styles.screen}>
-      <AppTopBar />
+      <View style={styles.topArea}>
+        <Text style={styles.title}>{tr('Get Started')}</Text>
+        <Text style={styles.subtitle}>{tr('Your AI-companion awaits')}</Text>
+      </View>
+
       <View style={styles.card}>
-        <Text style={styles.title}>Create account</Text>
-        <TextInput placeholder="Full name" style={styles.input} />
-        <TextInput placeholder="Email" style={styles.input} />
-        <TextInput placeholder="Password" secureTextEntry style={styles.input} />
+        <TextInput placeholder={tr('First Name')} placeholderTextColor="#9CA3AF" style={styles.input} />
+        <TextInput placeholder={tr('Last Name')} placeholderTextColor="#9CA3AF" style={styles.input} />
+        <TextInput placeholder={tr('Account')} placeholderTextColor="#9CA3AF" style={styles.input} />
+        <TextInput placeholder={tr('Age (optional)')} placeholderTextColor="#9CA3AF" style={styles.input} />
+        <TextInput placeholder={tr('Email')} placeholderTextColor="#9CA3AF" style={styles.input} />
         <Pressable onPress={() => router.replace('/home')} style={styles.button}>
-          <Text style={styles.buttonText}>Sign Up</Text>
+          <Text style={styles.buttonText}>{tr('SIGN UP')}</Text>
         </Pressable>
         <Pressable onPress={() => router.push('/login')}>
-          <Text style={styles.link}>Already registered? Log In</Text>
+          <Text style={styles.link}>{tr('Already registered? Log In')}</Text>
         </Pressable>
       </View>
     </View>
@@ -24,44 +31,57 @@ export default function SignupPage() {
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: '#F8FFF9',
+    backgroundColor: '#071026',
     flex: 1,
-    padding: 18,
+  },
+  topArea: {
+    backgroundColor: '#04112B',
+    paddingHorizontal: 20,
+    paddingTop: 58,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    elevation: 2,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    flex: 1,
     marginTop: 18,
-    padding: 16,
+    paddingHorizontal: 18,
+    paddingTop: 18,
   },
   title: {
-    color: '#123524',
-    fontSize: 24,
+    color: '#EAF2FF',
+    fontSize: 28,
     fontWeight: '800',
-    marginBottom: 14,
+  },
+  subtitle: {
+    color: '#9FB6DA',
+    fontSize: 13,
+    marginBottom: 16,
+    marginTop: 4,
   },
   input: {
-    backgroundColor: '#EFF7F1',
-    borderRadius: 10,
-    marginBottom: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
+    borderBottomColor: '#E5E7EB',
+    borderBottomWidth: 1,
+    fontSize: 14,
+    marginBottom: 14,
+    paddingVertical: 10,
   },
   button: {
     alignItems: 'center',
-    backgroundColor: '#2A6A4A',
-    borderRadius: 12,
-    marginTop: 4,
-    paddingVertical: 12,
+    backgroundColor: '#1D4ED8',
+    borderRadius: 999,
+    marginTop: 8,
+    paddingVertical: 11,
   },
   buttonText: {
     color: '#fff',
+    fontSize: 13,
     fontWeight: '700',
   },
   link: {
-    color: '#2A6A4A',
-    fontWeight: '700',
+    color: '#4169B6',
+    fontSize: 12,
+    fontWeight: '600',
     marginTop: 14,
     textAlign: 'center',
   },

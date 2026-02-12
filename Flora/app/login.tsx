@@ -1,20 +1,25 @@
-import AppTopBar from '@/components/app-top-bar';
+import { useLanguage } from '@/contexts/language-context';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function LoginPage() {
+  const { tr } = useLanguage();
+
   return (
     <View style={styles.screen}>
-      <AppTopBar />
+      <View style={styles.topArea}>
+        <Text style={styles.title}>{tr('Get Started')}</Text>
+        <Text style={styles.subtitle}>{tr('Your AI-companion awaits')}</Text>
+      </View>
+
       <View style={styles.card}>
-        <Text style={styles.title}>Welcome back</Text>
-        <TextInput placeholder="Email" style={styles.input} />
-        <TextInput placeholder="Password" secureTextEntry style={styles.input} />
+        <TextInput placeholder={tr('Email')} placeholderTextColor="#9CA3AF" style={styles.input} />
+        <TextInput placeholder={tr('Password')} placeholderTextColor="#9CA3AF" secureTextEntry style={styles.input} />
         <Pressable onPress={() => router.replace('/home')} style={styles.button}>
-          <Text style={styles.buttonText}>Log In</Text>
+          <Text style={styles.buttonText}>{tr('LOGIN')}</Text>
         </Pressable>
         <Pressable onPress={() => router.push('/signup')}>
-          <Text style={styles.link}>Need an account? Sign Up</Text>
+          <Text style={styles.link}>{tr('Need an account? Sign Up')}</Text>
         </Pressable>
       </View>
     </View>
@@ -23,44 +28,57 @@ export default function LoginPage() {
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: '#F8FFF9',
+    backgroundColor: '#071026',
     flex: 1,
-    padding: 18,
+  },
+  topArea: {
+    backgroundColor: '#04112B',
+    paddingHorizontal: 20,
+    paddingTop: 58,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    elevation: 2,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    flex: 1,
     marginTop: 18,
-    padding: 16,
+    paddingHorizontal: 18,
+    paddingTop: 18,
   },
   title: {
-    color: '#123524',
-    fontSize: 24,
+    color: '#EAF2FF',
+    fontSize: 28,
     fontWeight: '800',
-    marginBottom: 14,
+  },
+  subtitle: {
+    color: '#9FB6DA',
+    fontSize: 13,
+    marginBottom: 16,
+    marginTop: 4,
   },
   input: {
-    backgroundColor: '#EFF7F1',
-    borderRadius: 10,
-    marginBottom: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
+    borderBottomColor: '#E5E7EB',
+    borderBottomWidth: 1,
+    fontSize: 14,
+    marginBottom: 18,
+    paddingVertical: 10,
   },
   button: {
     alignItems: 'center',
-    backgroundColor: '#2A6A4A',
-    borderRadius: 12,
-    marginTop: 4,
-    paddingVertical: 12,
+    backgroundColor: '#1D4ED8',
+    borderRadius: 999,
+    marginTop: 8,
+    paddingVertical: 11,
   },
   buttonText: {
     color: '#fff',
+    fontSize: 13,
     fontWeight: '700',
   },
   link: {
-    color: '#2A6A4A',
-    fontWeight: '700',
+    color: '#4169B6',
+    fontSize: 12,
+    fontWeight: '600',
     marginTop: 14,
     textAlign: 'center',
   },

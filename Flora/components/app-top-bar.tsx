@@ -1,4 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
+import { useLanguage } from '@/contexts/language-context';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
 ];
 
 export default function AppTopBar() {
+  const { tr } = useLanguage();
   const [open, setOpen] = useState(false);
 
   return (
@@ -36,22 +38,26 @@ export default function AppTopBar() {
         </Pressable>
       </View>
 
-      {open ? (
-        <View style={styles.menuPanel}>
-          {NAV_ITEMS.map((item) => (
-            <Pressable
-              key={item.label}
-              onPress={() => {
-                setOpen(false);
-                router.push(item.route as never);
-              }}
-              style={styles.menuItem}
-            >
-              <Text style={styles.menuText}>{item.label}</Text>
-            </Pressable>
-          ))}
-        </View>
-      ) : null}
+      {open ? <Pressable onPress={() => setOpen(false)} style={styles.backdrop} /> : null}
+
+      <View style={[styles.drawer, open ? styles.drawerOpen : null]}>
+        <Pressable onPress={() => setOpen(false)} style={styles.closeButton}>
+          <FontAwesome name="close" size={18} color="#123524" />
+        </Pressable>
+
+        {NAV_ITEMS.map((item) => (
+          <Pressable
+            key={item.label}
+            onPress={() => {
+              setOpen(false);
+              router.push(item.route as never);
+            }}
+            style={styles.menuItem}
+          >
+            <Text style={styles.menuText}>{tr(item.label)}</Text>
+          </Pressable>
+        ))}
+      </View>
     </View>
   );
 }
@@ -99,14 +105,38 @@ const styles = StyleSheet.create({
     right: -9,
     width: 14,
   },
-  menuPanel: {
+  backdrop: {
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    bottom: -1000,
+    left: -20,
+    position: 'absolute',
+    right: -20,
+    top: -20,
+    zIndex: 24,
+  },
+  drawer: {
     backgroundColor: '#F5FBF6',
     borderColor: '#D0E8D6',
-    borderRadius: 14,
-    borderWidth: 1,
-    marginTop: 10,
-    padding: 8,
+    borderRightWidth: 1,
+    bottom: -1000,
+    left: -280,
+    paddingHorizontal: 10,
+    paddingTop: 56,
+    position: 'absolute',
+    top: -20,
+    width: 260,
+    zIndex: 25,
   },
+  closeButton: {
+    alignItems: 'center',
+    height: 36,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 10,
+    top: 12,
+    width: 36,
+  },
+  drawerOpen: { left: -20 },
   menuItem: {
     borderRadius: 10,
     paddingHorizontal: 12,
