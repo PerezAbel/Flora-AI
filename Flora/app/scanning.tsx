@@ -12,8 +12,8 @@ export default function ScanningScreen() {
   const mode = params.mode === 'animal' ? 'animal' : 'crop';
   const [scanDone, setScanDone] = useState(false);
 
-  const runScan = () => {
-    addQuickScan(mode);
+  const runScan = async () => {
+    await addQuickScan(mode);
     setScanDone(true);
   };
 

@@ -16,7 +16,7 @@ export default function LiveMonitoringScreen() {
   useEffect(() => {
     if (!running) return;
     const id = setInterval(() => {
-      addLiveMonitoringUpdate(mode);
+      void addLiveMonitoringUpdate(mode);
       setUpdates((c) => c + 1);
     }, 4000);
     return () => clearInterval(id);

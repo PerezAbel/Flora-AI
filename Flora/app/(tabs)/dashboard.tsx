@@ -1,327 +1,421 @@
-import { useAgentData } from '@/contexts/agent-data-context';
-import { useLanguage } from '@/contexts/language-context';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Text } from "@/components/agro/ui";
+import { imageSource, photos } from "@/contexts/agro-context";
+import { useState } from "react";
+import { ImageBackground, Pressable, StyleSheet, View } from "react-native";
+import { router } from "expo-router";
+import {
+  Button,
+  C,
+  Card,
+  Icon,
+  Label,
+  Page,
+  Pill,
+  Sheet,
+  s,
+  type IconName,
+} from "@/components/agro/ui";
 
-const cropData = {
-  title: 'Crop Disease Analysis',
-  mainTitle: 'Total crop samples analyzed this week',
-  mainValue: '1,247',
-  mainSub: '+12% more scans than last week',
-  trendBars: [42, 68, 55, 80, 50, 73, 62],
-  stats: [
-    { icon: 'scan-outline', color: '#F97316', value: '347', label: 'Crop scans today' },
-    { icon: 'alert-circle-outline', color: '#EF4444', value: '63', label: 'High-risk detections' },
-    { icon: 'checkmark-done-outline', color: '#10B981', value: '81%', label: 'Healthy classifications' },
-    { icon: 'analytics-outline', color: '#3B82F6', value: '89%', label: 'Model confidence avg.' },
-  ],
-  classTitle: 'Detected Disease Classes',
-  classBars: [56, 88, 64, 79, 61],
-  classLabels: ['Rust', 'Blight', 'Virus', 'Pest', 'Healthy'],
-  actions: [
-    '1. Prioritize treatment for blocks with Rust and Blight detections.',
-    '2. Re-scan flagged crops after 48 hours to confirm improvement.',
-    '3. Upload clear close-up leaf photos for better classification accuracy.',
-  ],
-};
-
-const animalData = {
-  title: 'Animal Health Analysis',
-  mainTitle: 'Total animal checks analyzed this week',
-  mainValue: '934',
-  mainSub: '+9% more checks than last week',
-  trendBars: [36, 62, 52, 71, 48, 66, 58],
-  stats: [
-    { icon: 'pulse-outline', color: '#F97316', value: '211', label: 'Animal checks today' },
-    { icon: 'warning-outline', color: '#EF4444', value: '27', label: 'High-risk symptoms' },
-    { icon: 'medkit-outline', color: '#10B981', value: '76%', label: 'Healthy classifications' },
-    { icon: 'analytics-outline', color: '#3B82F6', value: '87%', label: 'Model confidence avg.' },
-  ],
-  classTitle: 'Detected Condition Classes',
-  classBars: [62, 49, 70, 44, 81],
-  classLabels: ['Fever', 'Skin', 'Resp.', 'Injury', 'Healthy'],
-  actions: [
-    '1. Isolate animals flagged with fever-like symptoms.',
-    '2. Re-check breathing-related cases in the evening.',
-    '3. Upload clearer close-up photos of visible symptoms.',
-  ],
-};
-
-export default function DashboardTab() {
-  const { tr } = useLanguage();
-  const { alerts, scanHistory } = useAgentData();
-  const [mode, setMode] = useState<'crop' | 'animal'>('crop');
-  const data = mode === 'crop' ? cropData : animalData;
-  const modeHistory = scanHistory.filter((entry) => entry.mode === mode);
-  const modeAlerts = alerts.filter((entry) => entry.mode === mode);
-  const highRiskCount = modeAlerts.filter((entry) => entry.level === 'High').length;
-  const healthyCount = modeHistory.filter((entry) => entry.result.toLowerCase().includes('healthy')).length;
-  const healthyPct = modeHistory.length ? Math.round((healthyCount / modeHistory.length) * 100) : 0;
-  const mainValue = `${modeHistory.length}`;
-  const stats = [
-    { ...data.stats[0], value: `${modeHistory.length}` },
-    { ...data.stats[1], value: `${highRiskCount}` },
-    { ...data.stats[2], value: `${healthyPct}%` },
-    { ...data.stats[3], value: `${80 + Math.min(modeHistory.length, 15)}%` },
-  ];
-
+const farms = [
+  {
+    name: "North Field",
+    detail: "12ac · Maize",
+    health: 87,
+    moisture: 68,
+    temperature: 27,
+    humidity: 74,
+    rain: 12,
+  },
+  {
+    name: "South Field",
+    detail: "8ac · Tomato",
+    health: 64,
+    moisture: 52,
+    temperature: 29,
+    humidity: 68,
+    rain: 9,
+  },
+  {
+    name: "Livestock Pen",
+    detail: "4ac · Cattle & Poultry",
+    health: 92,
+    moisture: 62,
+    temperature: 26,
+    humidity: 71,
+    rain: 12,
+  },
+];
+const devices: {
+  name: string;
+  kind: string;
+  icon: IconName;
+  battery: number;
+}[] = [
+  { name: "AgriDrone X1", kind: "Drone", icon: "airplane", battery: 72 },
+  { name: "SoilSense Pro", kind: "Soil sensor", icon: "radio", battery: 91 },
+  { name: "IrriBot 3000", kind: "Irrigation", icon: "water", battery: 55 },
+  {
+    name: "WeatherMast",
+    kind: "Weather station",
+    icon: "partly-sunny",
+    battery: 88,
+  },
+];
+function Trend({ values }: { values: number[] }) {
+  const [width, setWidth] = useState(280);
   return (
-    <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
-      <Text style={styles.header}>{tr(data.title)}</Text>
-
-      <View style={styles.switcher}>
-        <Pressable
-          onPress={() => setMode('crop')}
-          style={[styles.switchPill, mode === 'crop' ? styles.switchPillActive : null]}
-        >
-          <View style={styles.switchContent}>
-            <Ionicons color={mode === 'crop' ? '#FFFFFF' : '#6B7280'} name="leaf-outline" size={14} />
-            <Text style={mode === 'crop' ? styles.switchTextActive : styles.switchText}>{tr('Crop')}</Text>
-          </View>
-        </Pressable>
-        <Pressable
-          onPress={() => setMode('animal')}
-          style={[styles.switchPill, mode === 'animal' ? styles.switchPillActive : null]}
-        >
-          <View style={styles.switchContent}>
-            <Ionicons color={mode === 'animal' ? '#FFFFFF' : '#6B7280'} name="paw-outline" size={14} />
-            <Text style={mode === 'animal' ? styles.switchTextActive : styles.switchText}>{tr('Animal')}</Text>
-          </View>
-        </Pressable>
+    <View
+      accessibilityLabel={`Seven-day trend: ${values.join(", ")}`}
+      style={{ height: 100 }}
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+    >
+      <View
+        style={{
+          height: 76,
+          position: "relative",
+          overflow: "hidden",
+          borderBottomWidth: 1,
+          borderBottomColor: C.line,
+        }}
+      >
+        {values.slice(0, -1).map((v, i) => {
+          const dx = width / 6;
+          const y = 73 - v * 0.65;
+          const dy = (v - values[i + 1]) * 0.65;
+          return (
+            <View
+              key={i}
+              style={{
+                position: "absolute",
+                left: dx * i,
+                top: y,
+                width: Math.sqrt(dx * dx + dy * dy),
+                height: 2,
+                backgroundColor: C.mint,
+                transformOrigin: "left center",
+                transform: [{ rotate: `${Math.atan2(dy, dx)}rad` }],
+              }}
+            />
+          );
+        })}
       </View>
-
-      <View style={styles.revenueCard}>
-        <Text style={styles.revenueTitle}>{tr(data.mainTitle)}</Text>
-        <Text style={styles.revenueValue}>{mainValue}</Text>
-        <Text style={styles.revenueSub}>{tr(data.mainSub)}</Text>
-        <View style={styles.trendRow}>
-          {data.trendBars.map((value, idx) => (
-            <View key={`trend-${idx}`} style={styles.trendCol}>
-              <View style={[styles.trendBar, { height: value }]} />
-            </View>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.quickStats}>
-        {stats.map((stat) => (
-          <View key={stat.label} style={styles.statCard}>
-            <Ionicons color={stat.color} name={stat.icon as never} size={18} />
-            <Text style={styles.statValue}>{stat.value}</Text>
-            <Text style={styles.statLabel}>{tr(stat.label)}</Text>
-          </View>
-        ))}
-      </View>
-
-      <View style={styles.chartCard}>
-        <Text style={styles.sectionTitle}>{tr(data.classTitle)}</Text>
-        <View style={styles.productBarsWrap}>
-          {data.classBars.map((value, idx) => (
-            <View key={`prod-${idx}`} style={styles.productBarCol}>
-              <View style={[styles.productBarBack, { height: 90 }]}>
-                <View style={[styles.productBarFront, { height: value }]} />
-              </View>
-              <Text style={styles.productLabel}>{tr(data.classLabels[idx])}</Text>
-            </View>
-          ))}
-        </View>
-        <Pressable onPress={() => router.push({ pathname: '/history', params: { type: mode } })} style={styles.historyBtn}>
-          <Ionicons color="#FFFFFF" name="time-outline" size={15} />
-          <Text style={styles.historyBtnText}>{tr('Check View Scan History')}</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.actionsCard}>
-        <Text style={styles.sectionTitle}>{tr('Farmer Actions')}</Text>
-        {data.actions.map((item) => (
-          <Text key={item} style={styles.actionItem}>
-            {tr(item)}
+      <View style={s.between}>
+        {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+          <Text key={i} style={[s.small, { fontSize: 9 }]}>
+            {d}
           </Text>
         ))}
       </View>
-    </ScrollView>
+    </View>
   );
 }
-
+export default function DashboardTab() {
+  const [selected, setSelected] = useState(0);
+  const [metric, setMetric] = useState("Health");
+  const [device, setDevice] = useState<string>();
+  const [pairing, setPairing] = useState(false);
+  const [simulated, setSimulated] = useState(true);
+  const farm = farms[selected];
+  const trend =
+    metric === "Health"
+      ? [40, 28, 68, 53, 76, 87, 80]
+      : metric === "Moisture"
+        ? [50, 65, 42, 58, 76, 64, 68]
+        : [35, 42, 40, 53, 45, 59, 52];
+  return (
+    <Page>
+      <View style={s.between}>
+        <Label>FARM OVERVIEW</Label>
+        <Pill text="ᛒ  Connect device" onPress={() => setPairing(true)} />
+      </View>
+      <View style={{ flexDirection: "row", gap: 7 }}>
+        {farms.map((f, i) => (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ selected: selected === i }}
+            onPress={() => setSelected(i)}
+            key={f.name}
+            style={[
+              styles.farmTab,
+              selected === i && { backgroundColor: "#377D5B" },
+            ]}
+          >
+            <Text
+              style={{
+                color: selected === i ? C.text : C.muted,
+                fontSize: 11,
+                fontWeight: "700",
+              }}
+            >
+              {f.name}
+            </Text>
+            <Text
+              style={{
+                color: selected === i ? "#C4E2D1" : C.muted,
+                fontSize: 9,
+                marginTop: 3,
+              }}
+            >
+              {f.detail}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      <ImageBackground
+        source={imageSource(photos.farm)}
+        imageStyle={{ borderRadius: 17 }}
+        style={styles.hero}
+      >
+        <View style={styles.heroOverlay}>
+          <View style={s.between}>
+            <Text style={s.badge}>DRONE VIEW · DEMO</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.navigate("/current-updates")}
+            >
+              <Text style={[s.badge, { color: C.orange }]}>⚠ 1 alert</Text>
+            </Pressable>
+          </View>
+          <View style={s.between}>
+            <View>
+              <Text style={s.title}>{farm.name}</Text>
+              <Text style={s.text}>{farm.detail}</Text>
+            </View>
+            <View>
+              <Text style={[s.value, { color: C.text, fontSize: 32 }]}>
+                {farm.health}%
+              </Text>
+              <Text style={s.small}>Health</Text>
+            </View>
+          </View>
+        </View>
+      </ImageBackground>
+      <View style={styles.grid}>
+        {(
+          [
+            {
+              icon: "water",
+              value: `${farm.moisture}%`,
+              label: "Soil Moisture",
+              badge: "+2%",
+            },
+            {
+              icon: "thermometer",
+              value: `${farm.temperature}°C`,
+              label: "Temperature",
+              badge: "Optimal",
+            },
+            {
+              icon: "cloud",
+              value: `${farm.humidity}%`,
+              label: "Humidity",
+              badge: "-1%",
+            },
+            {
+              icon: "rainy",
+              value: `${farm.rain}mm`,
+              label: "Rainfall",
+              badge: "This wk",
+            },
+          ] as const
+        ).map((item, i) => (
+          <View key={item.label} style={styles.metric}>
+            <View style={s.between}>
+              <Icon name={item.icon} color={i === 1 ? C.orange : C.mint} />
+              <Text style={[s.badge, { fontSize: 9 }]}>{item.badge}</Text>
+            </View>
+            <Text style={[s.value, i === 1 && { color: C.orange }]}>
+              {item.value}
+            </Text>
+            <Text style={s.small}>{item.label}</Text>
+          </View>
+        ))}
+      </View>
+      <Card>
+        <View style={s.between}>
+          <Text style={s.sectionTitle}>7-Day Trends</Text>
+          <Text style={s.small}>Sample week</Text>
+        </View>
+        <View style={s.row}>
+          {["Health", "Moisture", "Temp"].map((m) => (
+            <View key={m} style={{ flex: 1 }}>
+              <Pill
+                text={m}
+                active={metric === m}
+                onPress={() => setMetric(m)}
+              />
+            </View>
+          ))}
+        </View>
+        <Trend values={trend} />
+        <View style={[s.row, { gap: 24 }]}>
+          {[
+            ["Min", Math.min(...trend) + "%"],
+            ["Max", Math.max(...trend) + "%"],
+            ["Avg", Math.round(trend.reduce((a, b) => a + b, 0) / 7) + "%"],
+            ["Trend", "↑ Up"],
+          ].map(([k, v]) => (
+            <View key={k}>
+              <Text style={s.small}>{k}</Text>
+              <Text style={{ color: C.mint, fontWeight: "700", fontSize: 12 }}>
+                {metric === "Temp" && k !== "Trend"
+                  ? `${Math.round(parseInt(v) / 4 + 10)}°C`
+                  : v}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </Card>
+      <Card>
+        <Text style={s.sectionTitle}>All Farms Overview</Text>
+        {farms.map((f, i) => (
+          <Pressable
+            accessibilityRole="button"
+            key={f.name}
+            onPress={() => setSelected(i)}
+            style={{ gap: 6, paddingVertical: 3 }}
+          >
+            <View style={s.between}>
+              <Text style={[s.text, { fontSize: 13, fontWeight: "600" }]}>
+                {f.name}
+              </Text>
+              <Text
+                style={{
+                  color: i === 1 ? C.orange : C.mint,
+                  fontWeight: "700",
+                  fontSize: 12,
+                }}
+              >
+                {f.health}%{" "}
+                <Text style={s.small}>{f.detail.split(" · ")[0]}</Text>
+              </Text>
+            </View>
+            <View style={styles.track}>
+              <View
+                style={{
+                  width: `${f.health}%`,
+                  height: 6,
+                  borderRadius: 4,
+                  backgroundColor: i === 1 ? C.orange : C.mint,
+                }}
+              />
+            </View>
+          </Pressable>
+        ))}
+      </Card>
+      <View style={s.between}>
+        <Text style={s.sectionTitle}>Connected Devices</Text>
+        <Text style={s.badge}>Demo setup</Text>
+      </View>
+      {devices.map((d) => (
+        <Pressable
+          accessibilityRole="button"
+          key={d.name}
+          onPress={() => setDevice(d.name)}
+          style={styles.device}
+        >
+          <View style={styles.deviceIcon}>
+            <Icon name={d.icon} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.text, { fontWeight: "700", fontSize: 13 }]}>
+              {d.name}
+            </Text>
+            <Text style={s.small}>{d.kind}</Text>
+          </View>
+          <View style={{ alignItems: "flex-end" }}>
+            <Text style={{ color: C.mint, fontSize: 10 }}>
+              ● {simulated ? "Simulated" : "Offline"}
+            </Text>
+            <Text style={s.small}>▣ {d.battery}%</Text>
+          </View>
+        </Pressable>
+      ))}
+      <Text style={s.small}>
+        Preview farm data. Live readings appear once supported hardware is
+        connected.
+      </Text>
+      <Button
+        title="Scan this farm"
+        icon="scan"
+        onPress={() => router.navigate("/home")}
+      />
+      <Sheet
+        visible={pairing || !!device}
+        title={device ?? "Connect your farm"}
+        onClose={() => {
+          setPairing(false);
+          setDevice(undefined);
+        }}
+      >
+        <Icon name="bluetooth" size={42} />
+        <Text style={s.text}>
+          {device
+            ? "Explore this device in the demo farm."
+            : "Connect a drone, soil sensor, irrigation system or weather station."}
+        </Text>
+        <Text style={s.small}>
+          This interface previews device management. Bluetooth pairing and live
+          telemetry require a supported device integration.
+        </Text>
+        <Button
+          title={simulated ? "Pause demo connection" : "Resume demo connection"}
+          secondary
+          onPress={() => setSimulated(!simulated)}
+        />
+        <Text style={s.badge}>
+          Demo connection: {simulated ? "active" : "paused"}
+        </Text>
+      </Sheet>
+    </Page>
+  );
+}
 const styles = StyleSheet.create({
-  screen: {
-    backgroundColor: '#F3F4F6',
+  farmTab: {
     flex: 1,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 120,
-  },
-  header: {
-    color: '#0F172A',
-    fontSize: 20,
-    fontWeight: '800',
-    marginBottom: 10,
-  },
-  switcher: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
+    padding: 11,
+    borderRadius: 13,
+    backgroundColor: C.card,
     borderWidth: 1,
-    flexDirection: 'row',
-    marginBottom: 12,
-    padding: 4,
+    borderColor: C.line,
   },
-  switchPill: {
-    alignItems: 'center',
-    borderRadius: 8,
+  hero: {
+    height: 170,
+    backgroundColor: C.card,
+    borderRadius: 17,
+    overflow: "hidden",
+  },
+  heroOverlay: {
     flex: 1,
-    paddingVertical: 8,
+    backgroundColor: "rgba(9,30,17,0.32)",
+    padding: 15,
+    justifyContent: "space-between",
   },
-  switchContent: {
-    alignItems: 'center',
-    flexDirection: 'row',
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: 9 },
+  metric: {
+    width: "48%",
+    flexGrow: 1,
+    backgroundColor: C.card,
+    borderRadius: 17,
+    padding: 13,
     gap: 6,
   },
-  switchPillActive: {
-    backgroundColor: '#F97316',
-  },
-  switchText: {
-    color: '#6B7280',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  switchTextActive: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  revenueCard: {
-    backgroundColor: '#F97316',
-    borderRadius: 16,
-    marginBottom: 12,
-    padding: 14,
-  },
-  revenueTitle: {
-    color: '#FFEDD5',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  revenueValue: {
-    color: '#FFFFFF',
-    fontSize: 31,
-    fontWeight: '800',
-    marginTop: 3,
-  },
-  revenueSub: {
-    color: '#FFEDD5',
-    fontSize: 12,
-    marginTop: 2,
-  },
-  trendRow: {
-    alignItems: 'flex-end',
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 10,
-  },
-  trendCol: {
-    flex: 1,
-    height: 80,
-    justifyContent: 'flex-end',
-  },
-  trendBar: {
-    backgroundColor: '#FDBA74',
-    borderRadius: 5,
-    width: '100%',
-  },
-  quickStats: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 12,
-  },
-  statCard: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    borderWidth: 1,
-    minWidth: '48%',
+  track: { backgroundColor: C.line, height: 6, borderRadius: 4 },
+  device: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
     padding: 12,
+    borderRadius: 16,
+    backgroundColor: C.card,
+    marginTop: -7,
   },
-  statValue: {
-    color: '#111827',
-    fontSize: 21,
-    fontWeight: '800',
-    marginTop: 4,
-  },
-  statLabel: {
-    color: '#6B7280',
-    fontSize: 12,
-    marginTop: 3,
-  },
-  chartCard: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E7EB',
-    borderRadius: 14,
-    borderWidth: 1,
-    marginBottom: 12,
-    padding: 14,
-  },
-  sectionTitle: {
-    color: '#0F172A',
-    fontSize: 16,
-    fontWeight: '800',
-    marginBottom: 10,
-  },
-  productBarsWrap: {
-    alignItems: 'flex-end',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  productBarCol: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  productBarBack: {
-    backgroundColor: '#EFF6FF',
-    borderRadius: 8,
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
-    width: 18,
-  },
-  productBarFront: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 8,
-    width: '100%',
-  },
-  productLabel: {
-    color: '#6B7280',
-    fontSize: 11,
-    marginTop: 6,
-  },
-  historyBtn: {
-    alignItems: 'center',
-    backgroundColor: '#2563EB',
-    borderRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 14,
-    paddingVertical: 10,
-  },
-  historyBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-    marginLeft: 6,
-  },
-  actionsCard: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E7EB',
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 14,
-  },
-  actionItem: {
-    color: '#374151',
-    fontSize: 14,
-    lineHeight: 22,
-    marginBottom: 4,
+  deviceIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: C.raised,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

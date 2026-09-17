@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import { runInference } from '@/services/inference';
 
 export type AgentMode = 'crop' | 'animal';
 export type AlertLevel = 'High' | 'Medium' | 'Low';
@@ -29,14 +30,18 @@ export type ScanEntry = {
   confidence: string;
   time: string;
   imageUri?: string;
+  description?: string;
+  treatment?: string[];
+  prevention?: string[];
+  alternatives?: Array<{ label: string; confidence: string; description?: string }>;
 };
 
 type AgentDataContextValue = {
   alerts: AlertItem[];
   scanHistory: ScanEntry[];
-  addUploadedSnapshot: (mode: AgentMode, imageUri?: string) => void;
-  addQuickScan: (mode: AgentMode) => void;
-  addLiveMonitoringUpdate: (mode: AgentMode) => void;
+  addUploadedSnapshot: (mode: AgentMode, imageUri?: string) => Promise<ScanEntry>;
+  addQuickScan: (mode: AgentMode) => Promise<ScanEntry>;
+  addLiveMonitoringUpdate: (mode: AgentMode) => Promise<ScanEntry>;
 };
 
 const seedAlerts: AlertItem[] = [
@@ -93,12 +98,8 @@ const seedAlerts: AlertItem[] = [
   },
 ];
 
-const seedHistory: ScanEntry[] = [
-  { id: 'c1', mode: 'crop', item: 'Maize Leaf - Block A2', result: 'Leaf Rust (High)', confidence: '91%', time: 'Today, 9:30 AM' },
-  { id: 'c2', mode: 'crop', item: 'Tomato Plant - Block B1', result: 'Blight (Medium)', confidence: '86%', time: 'Today, 7:12 AM' },
-  { id: 'a1h', mode: 'animal', item: 'Cow 017', result: 'Respiratory Risk (Medium)', confidence: '88%', time: 'Today, 8:20 AM' },
-  { id: 'a2h', mode: 'animal', item: 'Goat 032', result: 'Healthy', confidence: '93%', time: 'Today, 6:10 AM' },
-];
+// Start with an empty history so no prediction appears until the user uploads or runs a scan.
+const seedHistory: ScanEntry[] = [];
 
 const AgentDataContext = createContext<AgentDataContextValue | undefined>(undefined);
 
@@ -115,57 +116,110 @@ export function AgentDataProvider({ children }: { children: ReactNode }) {
   const [scanHistory, setScanHistory] = useState<ScanEntry[]>(seedHistory);
   const [counter, setCounter] = useState(2000);
 
-  const createGeneratedScan = (mode: AgentMode, source: 'upload' | 'scan' | 'live', imageUri?: string) => {
-    const crop = [
-      { item: 'Maize Leaf - Block A3', result: 'Rust (Medium)', level: 'Medium' as AlertLevel, title: 'Leaf Rust' },
-      { item: 'Tomato Leaf - Block B2', result: 'Blight (High)', level: 'High' as AlertLevel, title: 'Leaf Blight' },
-      { item: 'Cassava Leaf - Block C1', result: 'Healthy', level: 'Low' as AlertLevel, title: 'Healthy Crop' },
-    ];
-    const animal = [
-      { item: 'Cow 021', result: 'Fever Symptoms (High)', level: 'High' as AlertLevel, title: 'Fever Symptoms' },
-      { item: 'Goat 041', result: 'Skin Condition (Low)', level: 'Low' as AlertLevel, title: 'Skin Condition' },
-      { item: 'Chicken Batch E', result: 'Respiratory Risk (Medium)', level: 'Medium' as AlertLevel, title: 'Respiratory Risk' },
-    ];
-    const chosen = randomFrom(mode === 'crop' ? crop : animal);
-    const confidence = `${80 + Math.floor(Math.random() * 18)}%`;
+  const createGeneratedScan = async (mode: AgentMode, source: 'upload' | 'scan' | 'live', imageUri?: string): Promise<ScanEntry> => {
     const newIdNum = counter + 1;
     setCounter(newIdNum);
     const scanId = `SCAN-${mode === 'crop' ? 'CP' : 'AN'}-${newIdNum}`;
 
-    const historyEntry: ScanEntry = {
-      id: `h-${newIdNum}`,
-      mode,
-      item: chosen.item,
-      result: chosen.result,
-      confidence,
-      time: nowLabel(),
-      imageUri,
-    };
-
-    setScanHistory((prev) => [historyEntry, ...prev]);
-
-    if (chosen.level !== 'Low') {
-      const alert: AlertItem = {
-        id: `alert-${newIdNum}`,
-        title: chosen.title,
-        level: chosen.level,
-        detail: `${chosen.level} risk detected from ${source} analysis`,
-        time: nowLabel(),
-        color: chosen.level === 'High' ? '#FF4D4F' : '#F5A400',
-        badgeBg: chosen.level === 'High' ? '#FFE7E8' : '#FFF5DE',
-        badgeText: chosen.level === 'High' ? '#CC1F24' : '#B77700',
-        summary: `${chosen.level} risk detected from ${source} analysis`,
-        scanId,
-        zone: mode === 'crop' ? 'Block A3' : 'Livestock Pen 2',
-        confidence,
-        recommendation:
-          mode === 'crop'
-            ? 'Inspect affected plants and apply recommended treatment.'
-            : 'Isolate affected animals and run follow-up checks.',
-        nextCheck: mode === 'crop' ? 'Re-scan after 48 hours' : 'Re-check after 24 hours',
+    try {
+      const inference = await runInference(mode, imageUri);
+      const confidencePct = `${Math.round(inference.confidence * 100)}%`;
+      const historyEntry: ScanEntry = {
+        id: `h-${newIdNum}`,
         mode,
+        item: inference.label,
+        result: inference.label,
+        confidence: confidencePct,
+        time: nowLabel(),
+        imageUri,
+        description: inference.description,
+        treatment: inference.treatment,
+        prevention: inference.prevention,
+        alternatives: inference.alternatives?.map((alt) => ({
+          label: alt.label,
+          confidence: `${Math.round(alt.confidence * 100)}%`,
+          description: alt.description,
+        })),
       };
-      setAlerts((prev) => [alert, ...prev].slice(0, 12));
+      setScanHistory((prev) => [historyEntry, ...prev]);
+
+      const level = inference.risk ?? (inference.confidence > 0.8 ? 'High' : inference.confidence > 0.6 ? 'Medium' : 'Low');
+      if (level !== 'Low') {
+        const alert: AlertItem = {
+          id: `alert-${newIdNum}`,
+          title: inference.label,
+          level,
+          detail: inference.description ?? `${level} risk detected from ${source} analysis`,
+          time: nowLabel(),
+          color: level === 'High' ? '#FF4D4F' : '#F5A400',
+          badgeBg: level === 'High' ? '#FFE7E8' : '#FFF5DE',
+          badgeText: level === 'High' ? '#CC1F24' : '#B77700',
+          summary: inference.description ?? `${level} risk detected from ${source} analysis`,
+          scanId,
+          zone: mode === 'crop' ? 'Field Zone' : 'Livestock Pen',
+          confidence: confidencePct,
+          recommendation:
+            inference.recommendation ??
+            (mode === 'crop'
+              ? 'Inspect affected plants and apply recommended treatment.'
+              : 'Isolate affected animals and run follow-up checks.'),
+          nextCheck: mode === 'crop' ? 'Re-scan after 48 hours' : 'Re-check after 24 hours',
+          mode,
+        };
+        setAlerts((prev) => [alert, ...prev].slice(0, 12));
+      }
+      return historyEntry;
+    } catch (err) {
+      console.warn('Inference failed, falling back to simulated data', err);
+      // fallback to existing seeded behavior
+      const crop = [
+        { item: 'Maize Leaf - Block A3', result: 'Rust (Medium)', level: 'Medium' as AlertLevel, title: 'Leaf Rust' },
+        { item: 'Tomato Leaf - Block B2', result: 'Blight (High)', level: 'High' as AlertLevel, title: 'Leaf Blight' },
+        { item: 'Cassava Leaf - Block C1', result: 'Healthy', level: 'Low' as AlertLevel, title: 'Healthy Crop' },
+      ];
+      const animal = [
+        { item: 'Cow 021', result: 'Fever Symptoms (High)', level: 'High' as AlertLevel, title: 'Fever Symptoms' },
+        { item: 'Goat 041', result: 'Skin Condition (Low)', level: 'Low' as AlertLevel, title: 'Skin Condition' },
+        { item: 'Chicken Batch E', result: 'Respiratory Risk (Medium)', level: 'Medium' as AlertLevel, title: 'Respiratory Risk' },
+      ];
+      const chosen = randomFrom(mode === 'crop' ? crop : animal);
+      const confidence = `${80 + Math.floor(Math.random() * 18)}%`;
+
+      const historyEntry: ScanEntry = {
+        id: `h-${newIdNum}`,
+        mode,
+        item: chosen.item,
+        result: chosen.result,
+        confidence,
+        time: nowLabel(),
+        imageUri,
+      };
+      setScanHistory((prev) => [historyEntry, ...prev]);
+
+      if (chosen.level !== 'Low') {
+        const alert: AlertItem = {
+          id: `alert-${newIdNum}`,
+          title: chosen.title,
+          level: chosen.level,
+          detail: `${chosen.level} risk detected from ${source} analysis`,
+          time: nowLabel(),
+          color: chosen.level === 'High' ? '#FF4D4F' : '#F5A400',
+          badgeBg: chosen.level === 'High' ? '#FFE7E8' : '#FFF5DE',
+          badgeText: chosen.level === 'High' ? '#CC1F24' : '#B77700',
+          summary: `${chosen.level} risk detected from ${source} analysis`,
+          scanId,
+          zone: mode === 'crop' ? 'Block A3' : 'Livestock Pen 2',
+          confidence,
+          recommendation:
+            mode === 'crop'
+              ? 'Inspect affected plants and apply recommended treatment.'
+              : 'Isolate affected animals and run follow-up checks.',
+          nextCheck: mode === 'crop' ? 'Re-scan after 48 hours' : 'Re-check after 24 hours',
+          mode,
+        };
+        setAlerts((prev) => [alert, ...prev].slice(0, 12));
+      }
+      return historyEntry;
     }
   };
 

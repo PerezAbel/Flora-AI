@@ -1,170 +1,342 @@
-import { Ionicons } from '@expo/vector-icons';
-import { router, type Href } from 'expo-router';
-import { useLanguage } from '@/contexts/language-context';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-
-const groupOne = [
-  { id: 'farm-profile', label: 'Farm Profile', icon: 'leaf-outline' as const, route: '/farm-profile' as const },
-  { id: 'field-zones', label: 'Field Zones', icon: 'map-outline' as const, route: '/field-zones' as const },
-  {
-    id: 'crop-monitoring',
-    label: 'Crop Monitoring Schedule',
-    icon: 'calendar-outline' as const,
-    route: '/crop-monitoring-schedule' as const,
-  },
-  {
-    id: 'alert-preferences',
-    label: 'Disease Alert Preferences',
-    icon: 'notifications-outline' as const,
-    route: '/disease-alert-preferences' as const,
-  },
-  { id: 'weather-units', label: 'Weather Units', icon: 'partly-sunny-outline' as const, route: '/weather-units' as const },
-  { id: 'language-settings', label: 'Language Settings', icon: 'language-outline' as const, route: '/language-settings' as const },
-];
-
-const groupTwo = [
-  { id: 'scan-history', label: 'Scan History', icon: 'time-outline' as const, route: '/history' as const },
-  { id: 'data-sync', label: 'Data Sync', icon: 'cloud-upload-outline' as const, route: '/data-sync' as const },
-  { id: 'privacy', label: 'Privacy and Data', icon: 'shield-checkmark-outline' as const, route: '/privacy-and-data' as const },
-  { id: 'help', label: 'Farmer Help and Support', icon: 'help-circle-outline' as const, route: '/farmer-help-support' as const },
-  { id: 'logout', label: 'Logout', icon: 'log-out-outline' as const, route: '/login' as const },
-];
-
-function MenuGroup({
-  items,
-}: {
-  items: { id: string; label: string; icon: keyof typeof Ionicons.glyphMap; route: Href }[];
-}) {
-  const { tr } = useLanguage();
-
-  return (
-      <View style={styles.menuGroup}>
-      {items.map((item, index) => (
-        <Pressable
-          key={item.id}
-          onPress={() => router.push(item.route)}
-          style={[styles.menuItem, index !== items.length - 1 ? styles.menuItemDivider : null]}
-        >
-          <View style={styles.menuLeft}>
-            <Ionicons color="#8A8D96" name={item.icon} size={16} />
-            <Text style={styles.menuText}>{tr(item.label)}</Text>
-          </View>
-          <Ionicons color="#B6BAC3" name="chevron-forward" size={14} />
-        </Pressable>
-      ))}
-    </View>
-  );
-}
+import { Text } from "@/components/agro/ui";
+import { imageSource, avatar, photos, useAgro } from "@/contexts/agro-context";
+import { useState } from "react";
+import {
+  Image,
+  ImageBackground,
+  Pressable,
+  StyleSheet,
+  Switch,
+  View,
+} from "react-native";
+import { router } from "expo-router";
+import { useAgentData } from "@/contexts/agent-data-context";
+import {
+  Button,
+  C,
+  Card,
+  Field,
+  Icon,
+  Page,
+  Sheet,
+  s,
+  type IconName,
+} from "@/components/agro/ui";
 
 export default function ProfileTab() {
-  const { tr } = useLanguage();
-
+  const { profile, setProfile, notifications, setNotifications, posts } =
+    useAgro();
+  const { scanHistory } = useAgentData();
+  const [edit, setEdit] = useState(false);
+  const [draft, setDraft] = useState(profile);
+  const [panel, setPanel] = useState<string>();
+  const settings: { title: string; icon: IconName }[] = [
+    { title: "Privacy & Security", icon: "lock-closed" },
+    { title: "Payment Methods", icon: "card" },
+    { title: "Language & Region", icon: "globe" },
+    { title: "Scan History", icon: "clipboard" },
+    { title: "Help & Support", icon: "help-buoy" },
+  ];
   return (
-    <View style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.topArea}>
-          <View style={styles.headerRow}>
-            <View style={styles.headerSpacer} />
-            <Text style={styles.headerTitle}>{tr('Farmer Profile')}</Text>
-            <View style={styles.headerSpacer} />
+    <Page>
+      <ImageBackground
+        source={imageSource(photos.farm)}
+        style={styles.cover}
+        imageStyle={{ borderRadius: 16 }}
+      >
+        <View style={styles.coverShade} />
+      </ImageBackground>
+      <View style={[s.between, { marginTop: -55, alignItems: "flex-end" }]}>
+        <View>
+          <Image source={imageSource(avatar(12))} style={styles.avatar} />
+          <View style={styles.verified}>
+            <Icon name="leaf" size={15} color={C.bg} />
           </View>
-
-          <Image source={require('@/assets/images/icon.png')} style={styles.avatar} />
-          <Text style={styles.name}>Perez Kazungu</Text>
-          <Text style={styles.email}>@marieyogamed</Text>
         </View>
-
-        <View style={styles.bottomArea}>
-          <MenuGroup items={groupOne} />
-          <MenuGroup items={groupTwo} />
-          <Text style={styles.versionText}>{tr('App Version 1.0.0')}</Text>
+        <Button
+          title="Edit Profile"
+          secondary
+          onPress={() => {
+            setDraft(profile);
+            setEdit(true);
+          }}
+        />
+      </View>
+      <View style={{ gap: 5 }}>
+        <View style={s.row}>
+          <Text style={s.title}>{profile.name}</Text>
+          <Icon name="leaf" size={16} />
         </View>
-      </ScrollView>
-    </View>
+        <Text style={s.small}>
+          {profile.handle} · {profile.location}
+        </Text>
+        <Text style={[s.text, { marginTop: 5 }]}>{profile.bio}</Text>
+      </View>
+      <View style={styles.stats}>
+        {[
+          [
+            String(
+              posts.filter((p) => p.handle.startsWith(profile.handle)).length,
+            ),
+            "Posts",
+          ],
+          ["1.2K", "Followers"],
+          ["234", "Following"],
+          [String(scanHistory.length), "Scans"],
+        ].map(([v, k]) => (
+          <View style={{ alignItems: "center", gap: 4 }} key={k}>
+            <Text style={{ color: C.mint, fontSize: 18, fontWeight: "800" }}>
+              {v}
+            </Text>
+            <Text style={[s.small, { fontSize: 10 }]}>{k}</Text>
+          </View>
+        ))}
+      </View>
+      <Text style={s.sectionTitle}>Badges Earned</Text>
+      <View style={s.row}>
+        {[
+          ["🌱", "Crop Expert", "50+ scans"],
+          ["🤝", "Community Pro", "Top contributor"],
+          ["🌾", "Harvest Hero", "1K+ followers"],
+        ].map(([icon, title, sub]) => (
+          <View style={styles.badgeCard} key={title}>
+            <Text style={{ fontSize: 27 }}>{icon}</Text>
+            <Text
+              style={{
+                color: C.text,
+                fontSize: 10,
+                fontWeight: "700",
+                textAlign: "center",
+              }}
+            >
+              {title}
+            </Text>
+            <Text style={{ color: C.muted, fontSize: 8 }}>{sub}</Text>
+          </View>
+        ))}
+      </View>
+      <Text style={[s.small, { fontSize: 10 }]}>
+        Sample profile · follower counts and badges are illustrative
+      </Text>
+      <Text style={s.sectionTitle}>Notifications</Text>
+      <View style={styles.group}>
+        {[
+          "⚠️ Disease Alerts",
+          "👥 Community Posts",
+          "🏷️ Market Deals",
+          "☀️ Weather Alerts",
+        ].map((name, i) => (
+          <View style={[styles.setting, i < 3 && styles.line]} key={name}>
+            <Text style={s.text}>{name}</Text>
+            <Switch
+              accessibilityLabel={name}
+              value={notifications[i]}
+              onValueChange={(value) =>
+                setNotifications((old) =>
+                  old.map((v, j) => (j === i ? value : v)),
+                )
+              }
+              trackColor={{ false: "#304C3D", true: "#34795A" }}
+              thumbColor={notifications[i] ? C.mint : "#88998E"}
+            />
+          </View>
+        ))}
+      </View>
+      <Text style={s.sectionTitle}>Account</Text>
+      <View style={styles.group}>
+        {settings.map((item, i) => (
+          <Pressable
+            accessibilityRole="button"
+            key={item.title}
+            onPress={() => setPanel(item.title)}
+            style={[styles.setting, i < settings.length - 1 && styles.line]}
+          >
+            <View style={s.row}>
+              <Icon name={item.icon} size={18} />
+              <Text style={s.text}>{item.title}</Text>
+            </View>
+            <Icon name="chevron-forward" size={16} color={C.muted} />
+          </Pressable>
+        ))}
+      </View>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => setPanel("Sign Out")}
+        style={styles.signout}
+      >
+        <Text style={{ color: C.orange, fontWeight: "700" }}>Sign Out</Text>
+      </Pressable>
+      <Sheet visible={edit} title="Edit profile" onClose={() => setEdit(false)}>
+        <Field
+          label="Name"
+          value={draft.name}
+          onChangeText={(name) => setDraft({ ...draft, name })}
+        />
+        <Field
+          label="Handle"
+          value={draft.handle}
+          onChangeText={(handle) => setDraft({ ...draft, handle })}
+        />
+        <Field
+          label="Location"
+          value={draft.location}
+          onChangeText={(location) => setDraft({ ...draft, location })}
+        />
+        <Field
+          label="Bio"
+          value={draft.bio}
+          onChangeText={(bio) => setDraft({ ...draft, bio })}
+          multiline
+        />
+        <Text style={s.small}>Changes are saved for this preview session.</Text>
+        <Button
+          title="Save changes"
+          disabled={!draft.name.trim()}
+          onPress={() => {
+            setProfile(draft);
+            setEdit(false);
+          }}
+        />
+      </Sheet>
+      <Sheet
+        visible={!!panel}
+        title={panel ?? ""}
+        onClose={() => setPanel(undefined)}
+      >
+        {panel === "Scan History" ? (
+          <>
+            {!scanHistory.length && (
+              <Text style={s.text}>
+                No scans yet. Your crop and livestock checks will appear here.
+              </Text>
+            )}
+            {scanHistory.map((entry) => (
+              <Card key={entry.id}>
+                <Text style={s.sectionTitle}>{entry.result}</Text>
+                <Text style={s.small}>
+                  {entry.mode} · {entry.time} · Demo scan
+                </Text>
+              </Card>
+            ))}
+          </>
+        ) : panel === "Sign Out" ? (
+          <>
+            <Text style={s.text}>Return to the login screen?</Text>
+            <Button
+              title="Sign Out"
+              onPress={() => {
+                setPanel(undefined);
+                router.replace("/login");
+              }}
+            />
+          </>
+        ) : panel === "Payment Methods" ? (
+          <>
+            <Icon name="card-outline" size={40} />
+            <Text style={s.sectionTitle}>No payment methods added</Text>
+            <Text style={s.small}>
+              Payments are not available in the marketplace preview.
+            </Text>
+          </>
+        ) : panel === "Privacy & Security" ? (
+          <>
+            <Icon name="shield-checkmark-outline" size={40} />
+            <Text style={s.text}>You control your farm profile</Text>
+            <Text style={s.small}>
+              Posts, profile edits and shopping activity in this preview stay in
+              the current app session. Account security controls will be
+              available when sign-in is connected.
+            </Text>
+          </>
+        ) : panel === "Language & Region" ? (
+          <>
+            <Text style={s.text}>Current region: {profile.location}</Text>
+            <Button
+              title="Language settings"
+              secondary
+              onPress={() => {
+                setPanel(undefined);
+                router.push("/language-settings");
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <Text style={s.sectionTitle}>How can we help?</Text>
+            <Text style={s.text}>
+              Use Agro AI to explore crop and livestock scans. Visit Farm to
+              preview monitoring devices, Feed to share an update, and Shop to
+              browse or create a listing.
+            </Text>
+            <Text style={s.small}>
+              This preview does not provide a verified diagnosis, live device
+              connections or checkout.
+            </Text>
+          </>
+        )}
+      </Sheet>
+    </Page>
   );
 }
-
 const styles = StyleSheet.create({
-  screen: {
-    backgroundColor: '#e4e5e4',
-    flex: 1,
+  cover: {
+    height: 125,
+    backgroundColor: C.card,
+    marginHorizontal: -16,
+    marginTop: -16,
   },
-  content: {
-    paddingBottom: 100,
-  },
-  topArea: {
-    alignItems: 'center',
-    backgroundColor: '#011a55',
-    borderBottomLeftRadius: 26,
-    borderBottomRightRadius: 26,
-    paddingBottom: 18,
-    paddingHorizontal: 16,
-    paddingTop: 52,
-  },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 14,
-    width: '100%',
-  },
-  headerTitle: {
-    color: '#F5F7FC',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  headerSpacer: {
-    width: 20,
-  },
+  coverShade: { flex: 1, backgroundColor: "rgba(9,31,18,0.24)" },
   avatar: {
-    borderRadius: 28,
-    height: 56,
-    marginBottom: 8,
-    width: 56,
+    width: 76,
+    height: 76,
+    borderRadius: 18,
+    borderWidth: 3,
+    borderColor: C.bg,
+    backgroundColor: C.raised,
   },
-  name: {
-    color: '#F6F7FB',
-    fontSize: 16,
-    fontWeight: '700',
+  verified: {
+    position: "absolute",
+    bottom: -2,
+    right: -3,
+    backgroundColor: C.mint,
+    width: 25,
+    height: 25,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  email: {
-    color: '#8F95A4',
-    fontSize: 11,
-    marginTop: 2,
+  stats: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    backgroundColor: C.card,
+    borderRadius: 17,
+    paddingVertical: 17,
   },
-  bottomArea: {
-    paddingHorizontal: 14,
-    paddingTop: 14,
+  badgeCard: {
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: C.card,
+    borderRadius: 16,
+    paddingVertical: 15,
+    gap: 5,
   },
-  menuGroup: {
-    backgroundColor: '#F9F9FA',
-    borderRadius: 12,
-    marginBottom: 12,
-    paddingHorizontal: 12,
+  group: { backgroundColor: C.card, borderRadius: 17, overflow: "hidden" },
+  setting: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: 55,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
   },
-  menuItem: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    minHeight: 42,
-  },
-  menuItemDivider: {
-    borderBottomColor: '#ECEDEF',
-    borderBottomWidth: 1,
-  },
-  menuLeft: {
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  menuText: {
-    color: '#282B33',
-    fontSize: 12,
-    marginLeft: 10,
-  },
-  versionText: {
-    color: '#191919',
-    fontSize: 10,
-    marginTop: 14,
-    textAlign: 'center',
+  line: { borderBottomWidth: 1, borderBottomColor: C.line },
+  signout: {
+    borderWidth: 1,
+    borderColor: "#5B4824",
+    borderRadius: 14,
+    backgroundColor: "#252F1C",
+    minHeight: 48,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
