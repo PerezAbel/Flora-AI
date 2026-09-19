@@ -1,17 +1,17 @@
 import { ShortVideoFeed } from "@/components/agro/short-video-feed";
 import {
-  Text,
   Button,
   C,
   Field,
   Icon,
   IconButton,
   Page,
-  Pill,
   Sheet,
-  s,
+  Text,
+  s
 } from "@/components/agro/ui";
-import { imageSource } from "@/contexts/agro-context";
+import { avatar, imageSource, photos, useAgro, type Post } from "@/contexts/agro-context";
+import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
   Image,
@@ -21,8 +21,6 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { avatar, photos, useAgro, type Post } from "@/contexts/agro-context";
 
 export default function CommunityTab() {
   const { posts, setPosts, profile } = useAgro();
@@ -78,10 +76,10 @@ export default function CommunityTab() {
     return <ShortVideoFeed onBack={() => setFeedView("posts")} />;
   return (
     <Page>
-      <View style={s.row}>
+      {/* <View style={s.row}>
         <Pill text="Posts" active />
         <Pill text="Short videos" onPress={() => setFeedView("shorts")} />
-      </View>
+      </View> */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -116,7 +114,7 @@ export default function CommunityTab() {
           </Pressable>
         ))}
       </ScrollView>
-      <Pressable
+      {/* <Pressable
         accessibilityRole="button"
         onPress={() => setComposer(true)}
         style={styles.compose}
@@ -124,10 +122,10 @@ export default function CommunityTab() {
         <Icon name="create-outline" size={19} />
         <Text style={s.small}>Share something from your farm…</Text>
         <Icon name="add-circle" size={22} />
-      </Pressable>
-      <Text style={[s.label, { fontSize: 9 }]}>
+      </Pressable> */}
+      {/* <Text style={[s.label, { fontSize: 9 }]}>
         COMMUNITY PREVIEW · POSTS SAVED FOR THIS SESSION
-      </Text>
+      </Text> */}
       {posts.map((post) => (
         <View key={post.id} style={styles.post}>
           <View style={[s.between, { padding: 14 }]}>
@@ -190,7 +188,7 @@ export default function CommunityTab() {
       {!!error && <Text style={s.small}>{error}</Text>}
       <Sheet
         visible={composer}
-        title="Share with your community"
+        title="Follow"
         onClose={() => setComposer(false)}
       >
         <Text style={s.small}>Preview post · visible in this session</Text>
@@ -253,7 +251,7 @@ export default function CommunityTab() {
       </Sheet>
       <Sheet
         visible={!!story}
-        title={`${story ?? ""} · Farm story`}
+        title={`${story ?? ""} · Follow`}
         onClose={() => setStory(undefined)}
       >
         <Image
@@ -269,9 +267,9 @@ export default function CommunityTab() {
 const styles = StyleSheet.create({
   story: { alignItems: "center", gap: 6 },
   storyImage: {
-    width: 57,
-    height: 57,
-    borderRadius: 29,
+    width: 80,
+    height: 80,
+    borderRadius: 45,
     borderWidth: 2,
     borderColor: C.mint,
     backgroundColor: C.raised,
@@ -293,8 +291,9 @@ const styles = StyleSheet.create({
   },
   post: {
     backgroundColor: C.card,
-    borderRadius: 17,
-    overflow: "hidden",
+    // borderRadius: 17,
+    overflow: "hidden",  
+    width:"100%",
     gap: 2,
   },
   avatar: {

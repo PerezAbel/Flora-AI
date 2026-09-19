@@ -1,12 +1,12 @@
-import { Text, C, s, Icon, IconButton } from "@/components/agro/ui";
-import { imageSource, avatar } from "@/contexts/agro-context";
+import { C, Icon, IconButton, s, Text } from "@/components/agro/ui";
+import { avatar, imageSource } from "@/contexts/agro-context";
 import { router, Tabs } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
 
 function Header({ title, eyebrow }: { title: string; eyebrow: string }) {
   return (
@@ -43,7 +43,7 @@ export default function TabLayout() {
       initialRouteName="home"
       screenOptions={{
         header: ({ options }) => (
-          <Header title={options.title ?? "AGRO AI"} eyebrow="AGRO AI" />
+          <Header title={options.title ?? "AGRO AI"} eyebrow="" />
         ),
         tabBarActiveTintColor: C.mint,
         tabBarInactiveTintColor: "#647D6E",
@@ -62,7 +62,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="community"
         options={{
-          title: "Farmer Feed",
+          title: "Feed",
           tabBarLabel: "Feed",
           tabBarIcon: ({ color, size }) => (
             <Icon name="home" color={color} size={size} />
@@ -72,9 +72,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: "Dashboard",
+          title: "FARM",
           tabBarLabel: "Farm",
-          header: () => <Header title="Dashboard" eyebrow="FARM CONTROL" />,
+          header: () => <Header title="My Farm" eyebrow="" />,
           tabBarIcon: ({ color, size }) => (
             <Icon name="grid" color={color} size={size} />
           ),
@@ -83,7 +83,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Agro AI",
+          title: "Agro AI ASSISTANT",
           tabBarIcon: ({ focused }) => (
             <View
               style={[
@@ -99,9 +99,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="shop"
         options={{
-          title: "Marketplace",
+          title: "Market",
           tabBarLabel: "Shop",
-          header: () => <Header title="Marketplace" eyebrow="AGRO MARKET" />,
+          header: () => <Header title="Shop&Market" eyebrow="" />,
           tabBarIcon: ({ color, size }) => (
             <Icon name="bag-handle" color={color} size={size} />
           ),
