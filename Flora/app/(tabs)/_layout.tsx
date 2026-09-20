@@ -7,15 +7,17 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import { useTheme } from "@/contexts/theme-context";
 
 function Header({ title, eyebrow }: { title: string; eyebrow: string }) {
+  const { colors, mode } = useTheme();
   return (
-    <SafeAreaView edges={["top"]} style={{ backgroundColor: C.bg }}>
-      <StatusBar style="light" />
+    <SafeAreaView edges={["top"]} style={{ backgroundColor: colors.bg }}>
+      <StatusBar style={mode === "dark" ? "light" : "dark"} />
       <View style={styles.header}>
         <View style={{ gap: 4 }}>
-          <Text style={s.label}>{eyebrow}</Text>
-          <Text style={s.title}>{title}</Text>
+          <Text style={[s.label, { color: colors.mint }]}>{eyebrow}</Text>
+          <Text style={[s.title, { color: colors.text }]}>{title}</Text>
         </View>
         <View style={s.row}>
           <IconButton
@@ -38,6 +40,7 @@ function Header({ title, eyebrow }: { title: string; eyebrow: string }) {
 }
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   return (
     <Tabs
       initialRouteName="home"
@@ -45,18 +48,18 @@ export default function TabLayout() {
         header: ({ options }) => (
           <Header title={options.title ?? "AGRO AI"} eyebrow="" />
         ),
-        tabBarActiveTintColor: C.mint,
-        tabBarInactiveTintColor: "#647D6E",
+        tabBarActiveTintColor: colors.mint,
+        tabBarInactiveTintColor: colors.muted,
         tabBarLabelPosition: "below-icon",
         tabBarLabelStyle: { fontSize: 10, fontWeight: "600", marginTop: 3 },
         tabBarStyle: {
-          backgroundColor: C.bg,
-          borderTopColor: C.line,
+          backgroundColor: colors.bg,
+          borderTopColor: colors.line,
           height: 72 + insets.bottom,
           paddingTop: 8,
           paddingBottom: Math.max(insets.bottom, 10),
         },
-        sceneStyle: { backgroundColor: C.bg },
+        sceneStyle: { backgroundColor: colors.bg },
       }}
     >
       <Tabs.Screen
@@ -83,16 +86,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Agro AI ASSISTANT",
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={[
-                styles.scanIcon,
-                focused && { backgroundColor: "#39795A" },
-              ]}
-            >
-              <Icon name="scan" size={27} color={C.text} />
-            </View>
+          title: "Farm Assistant",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="sparkles" color={color} size={size} />
           ),
         }}
       />
@@ -149,14 +145,5 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: C.mint,
     backgroundColor: C.raised,
-  },
-  scanIcon: {
-    width: 50,
-    height: 48,
-    borderRadius: 17,
-    backgroundColor: "#24553E",
-    marginTop: -18,
-    borderWidth: 1,
-    borderColor: "#356B4D",
   },
 });

@@ -21,6 +21,7 @@ import {
   type ViewToken,
 } from "react-native";
 import { Button, C, Field, Icon, IconButton, s, Sheet, Text } from "./ui";
+import { useTheme } from "@/contexts/theme-context";
 
 function ClipPlayer({
   source,
@@ -33,6 +34,7 @@ function ClipPlayer({
   muted: boolean;
   onDuration?: (duration: number) => void;
 }) {
+  const { colors } = useTheme();
   const player = useVideoPlayer(source, (instance) => {
     instance.loop = true;
     instance.muted = true;
@@ -44,6 +46,8 @@ function ClipPlayer({
     status: player.status,
   });
   useEffect(() => {
+    // expo-video exposes muted as a player property for live audio control.
+    // eslint-disable-next-line react-hooks/immutability
     player.muted = muted;
   }, [player, muted]);
   useEffect(() => {
@@ -79,7 +83,7 @@ function ClipPlayer({
       </Pressable>
       {status === "loading" && (
         <View pointerEvents="none" style={styles.center}>
-          <ActivityIndicator size="large" color={C.mint} />
+          <ActivityIndicator size="large" color={colors.mint} />
         </View>
       )}
       {status === "error" && (
@@ -101,6 +105,7 @@ function ClipPlayer({
 }
 
 export function ShortVideoFeed({ onBack }: { onBack: () => void }) {
+  const { colors } = useTheme();
   const { videos, setVideos, profile } = useAgro();
   const focused = useIsFocused();
   const [appActive, setAppActive] = useState(
@@ -184,8 +189,8 @@ export function ShortVideoFeed({ onBack }: { onBack: () => void }) {
       ),
     );
   return (
-    <View style={styles.screen}>
-      <View style={styles.toolbar}>
+    <View style={[styles.screen, { backgroundColor: colors.bg }]}>
+      <View style={[styles.toolbar, { backgroundColor: colors.bg, borderBottomColor: colors.line }]}>
         <View style={s.row}>
           <IconButton
             name="arrow-back"
@@ -207,7 +212,7 @@ export function ShortVideoFeed({ onBack }: { onBack: () => void }) {
         />
       </View>
       {!!notice && (
-        <View style={[s.between, styles.notice]}>
+        <View style={[s.between, styles.notice, { backgroundColor: colors.card }]}>
           <Text accessibilityLiveRegion="polite" style={[s.small, { flex: 1 }]}>
             {notice}
           </Text>
@@ -463,7 +468,7 @@ const styles = StyleSheet.create({
   notice: { backgroundColor: C.card, paddingLeft: 15 },
   clip: { backgroundColor: "#050E09", overflow: "hidden" },
   playSurface: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -476,7 +481,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   center: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: "center",
     justifyContent: "center",
     gap: 14,

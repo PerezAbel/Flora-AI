@@ -1,7 +1,6 @@
 import {
   Text,
   Button,
-  C,
   Card,
   Icon,
   Page,
@@ -10,10 +9,13 @@ import {
   s,
 } from "@/components/agro/ui";
 import { useState } from "react";
-import { View } from "react-native";
+import { Image, View } from "react-native";
 import { useAgentData } from "@/contexts/agent-data-context";
+import { imageSource, photos } from "@/contexts/agro-context";
+import { useTheme } from "@/contexts/theme-context";
 
 export default function AlertsTab() {
+  const { colors } = useTheme();
   const { alerts } = useAgentData();
   const [filter, setFilter] = useState("All");
   const [selected, setSelected] = useState<string>();
@@ -37,12 +39,13 @@ export default function AlertsTab() {
       <Text style={s.small}>Preview alerts · sample farm data</Text>
       {visible.map((a) => (
         <Card key={a.id}>
+          <Image source={imageSource(a.mode === "animal" ? photos.livestock : photos.maize)} style={styles.alertImage} accessibilityLabel={`${a.mode === "animal" ? "Animal" : "Plant"} alert image`} />
           <View style={s.between}>
             <View style={[s.row, { flex: 1 }]}>
-              <Icon name="warning-outline" color={C.orange} />
+              <Icon name="warning-outline" color={colors.orange} />
               <Text style={[s.sectionTitle, { flex: 1 }]}>{a.title}</Text>
             </View>
-            <Text style={[s.badge, { color: C.orange }]}>{a.level}</Text>
+            <Text style={[s.badge, { color: colors.orange }]}>{a.level}</Text>
           </View>
           <Text style={s.text}>{a.detail}</Text>
           <Text style={s.small}>
@@ -78,3 +81,5 @@ export default function AlertsTab() {
     </Page>
   );
 }
+
+const styles = { alertImage: { width: "100%" as const, height: 140, borderRadius: 12, marginBottom: 8 } };

@@ -13,6 +13,7 @@ import { imageSource, photos } from "@/contexts/agro-context";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   ImageBackground,
   StyleSheet,
   View,
@@ -24,8 +25,10 @@ import {
   type AgentMode,
   type ScanEntry,
 } from "@/contexts/agent-data-context";
+import { useTheme } from "@/contexts/theme-context";
 
 export default function HomeScreen() {
+  const { colors } = useTheme();
   const { addUploadedSnapshot } = useAgentData();
   const [mode, setMode] = useState<AgentMode>("crop");
   const [image, setImage] = useState<string>();
@@ -86,7 +89,7 @@ export default function HomeScreen() {
       </View>
       <View style={{ flexDirection: "row", justifyContent: "center", gap: 10 }}>
         <Pill
-          text="🌿 Crops & Plants"
+          text="Crops & Plants"
           active={mode === "crop"}
           onPress={() => {
             setMode("crop");
@@ -94,7 +97,7 @@ export default function HomeScreen() {
           }}
         />
         <Pill
-          text="🐄 Livestock"
+          text="Livestock"
           active={mode === "animal"}
           onPress={() => {
             setMode("animal");
@@ -104,7 +107,7 @@ export default function HomeScreen() {
       </View>
       <ImageBackground
         source={imageSource(image ?? photos.farm)}
-        style={styles.frame}
+        style={[styles.frame, { backgroundColor: colors.card }]}
         imageStyle={{ borderRadius: 23 }}
       >
         <View
@@ -153,11 +156,11 @@ export default function HomeScreen() {
               <Icon
                 name={mode === "crop" ? "leaf-outline" : "paw-outline"}
                 size={48}
-                color={C.text}
+                color={colors.text}
               />
             )}
           </View>
-          <Text style={{ color: C.text, fontSize: 12, textAlign: "center" }}>
+          <Text style={{ color: colors.text, fontSize: 12, textAlign: "center" }}>
             {image
               ? "Photo ready for a sample analysis"
               : "Take a clear photo or choose one from your gallery"}
@@ -191,9 +194,9 @@ export default function HomeScreen() {
           onPress={() => void analyze()}
         />
       )}
-      {busy && <ActivityIndicator color={C.mint} />}
+      {busy && <ActivityIndicator color={colors.mint} />}
       {!!error && (
-        <Text accessibilityRole="alert" style={[s.text, { color: C.orange }]}>
+        <Text accessibilityRole="alert" style={[s.text, { color: colors.orange }] }>
           {error}
         </Text>
       )}
@@ -203,6 +206,7 @@ export default function HomeScreen() {
       </Text>
       {result && (
         <Card>
+          <Image source={imageSource(result.imageUri ?? (mode === "crop" ? photos.maize : photos.livestock))} style={styles.resultImage} resizeMode="cover" accessibilityLabel={`${mode === "crop" ? "Plant" : "Animal"} scan image`} />
           <View style={s.between}>
             <Label>SAMPLE ANALYSIS</Label>
             <Text style={s.badge}>{result.confidence} · demo</Text>
@@ -253,6 +257,7 @@ export default function HomeScreen() {
   );
 }
 const styles = StyleSheet.create({
+  resultImage: { width: '100%', height: 180, borderRadius: 14, backgroundColor: C.raised },
   frame: {
     height: 300,
     borderRadius: 23,

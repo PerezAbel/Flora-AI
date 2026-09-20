@@ -1,5 +1,4 @@
 import {
-  Text,
   Button,
   C,
   Card,
@@ -10,9 +9,11 @@ import {
   Page,
   Pill,
   Sheet,
+  Text,
   s,
 } from "@/components/agro/ui";
-import { imageSource } from "@/contexts/agro-context";
+import { imageSource, photos, useAgro, type Product } from "@/contexts/agro-context";
+import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
   Image,
@@ -23,7 +24,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { photos, useAgro, type Product } from "@/contexts/agro-context";
+import { useTheme } from "@/contexts/theme-context";
 
 const categories = [
   "All",
@@ -34,6 +35,7 @@ const categories = [
   "Produce",
 ];
 export default function ShopTab() {
+  const { colors } = useTheme();
   const { products, setProducts, cart, setCart, profile } = useAgro();
   const [mode, setMode] = useState("Buy");
   const [category, setCategory] = useState("All");
@@ -44,6 +46,12 @@ export default function ShopTab() {
   const [price, setPrice] = useState("");
   const [listingCategory, setListingCategory] = useState("Seeds");
   const [notice, setNotice] = useState("");
+
+  // NEW: image + stock + sold tracking
+  const [imageUri, setImageUri] = useState<string | undefined>();
+  const [stock, setStock] = useState("");
+  const [sold, setSold] = useState<Record<string, number>>({});
+
   const visible = products.filter(
     (p) =>
       (category === "All" || p.category === category) &&
@@ -56,6 +64,28 @@ export default function ShopTab() {
   const count = Object.values(cart).reduce((a, b) => a + b, 0);
   const add = (p: Product) =>
     setCart((old) => ({ ...old, [p.id]: (old[p.id] ?? 0) + 1 }));
+
+  // NEW: pick an image from the gallery
+  const pickImage = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      setNotice("Photo library permission is required to add an image.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets?.[0]) {
+      setImageUri(result.assets[0].uri);
+      setNotice("");
+    }
+  };
+
+  const clearImage = () => setImageUri(undefined);
+
   const save = () => {
     const amount = Number(price);
     if (!name.trim() || !Number.isFinite(amount) || amount <= 0) {
@@ -69,6 +99,8 @@ export default function ShopTab() {
         price: amount,
         category: listingCategory,
         photo: listingCategory === "Produce" ? photos.vegetables : photos.tools,
+        imageUri, // NEW
+        stock: Number(stock) || 0, // NEW
         seller: profile.name,
         badge: "Your listing",
       },
@@ -76,13 +108,26 @@ export default function ShopTab() {
     ]);
     setName("");
     setPrice("");
+    setStock("");
+    setImageUri(undefined);
     setNotice("Listing saved in this preview.");
   };
+
+  // NEW: derive "my shop" data
+  const myListings = products.filter(
+    (p) => p.id.startsWith("local-") || p.seller === profile.name,
+  );
+  const itemsSold = Object.values(sold).reduce((a, b) => a + b, 0);
+  const revenue = myListings.reduce(
+    (sum, p) => sum + (sold[p.id] ?? 0) * p.price,
+    0,
+  );
+
   return (
     <Page>
       <View style={s.row}>
-        <View style={styles.segment}>
-          {["Buy", "Sell"].map((m) => (
+        <View style={[styles.segment, { backgroundColor: colors.card }] }>
+          {["Buy", "Sell", "My Shop"].map((m) => (
             <Pressable
               accessibilityRole="button"
               accessibilityState={{ selected: mode === m }}
@@ -94,18 +139,24 @@ export default function ShopTab() {
               }}
               style={[
                 styles.segmentItem,
-                mode === m && { backgroundColor: "#398565" },
+                { backgroundColor: mode === m ? colors.mint : colors.card },
               ]}
             >
               <Icon
-                name={m === "Buy" ? "cart-outline" : "pricetag-outline"}
+                name={
+                  m === "Buy"
+                    ? "cart-outline"
+                    : m === "Sell"
+                      ? "pricetag-outline"
+                      : "storefront-outline"
+                }
                 size={15}
-                color={mode === m ? C.text : C.muted}
+                color={mode === m ? colors.bg : colors.muted}
               />
               <Text
                 style={{
-                  color: mode === m ? C.text : C.muted,
-                  fontSize: 13,
+                  color: mode === m ? colors.bg : colors.muted,
+                  fontSize: 12,
                   fontWeight: "700",
                 }}
               >
@@ -126,17 +177,17 @@ export default function ShopTab() {
       </View>
       {mode === "Buy" ? (
         <>
-          <View style={styles.search}>
-            <Icon name="search" size={18} color={C.muted} />
+          <View style={[styles.search, { backgroundColor: colors.card, borderColor: colors.line }]}>
+            <Icon name="search" size={18} color={colors.muted} />
             <TextInput
               accessibilityLabel="Search products"
               placeholder="Search products, seeds, equipment…"
-              placeholderTextColor={C.muted}
+              placeholderTextColor={colors.muted}
               value={query}
               onChangeText={setQuery}
               style={{
                 flex: 1,
-                color: C.text,
+                color: colors.text,
                 fontSize: 13,
                 paddingVertical: 14,
               }}
@@ -158,7 +209,7 @@ export default function ShopTab() {
           </ScrollView>
           <ImageBackground
             source={imageSource(photos.vegetables)}
-            style={styles.banner}
+            style={[styles.banner, { backgroundColor: colors.card }]}
             imageStyle={{ borderRadius: 16 }}
           >
             <View style={styles.bannerShade}>
@@ -171,17 +222,19 @@ export default function ShopTab() {
           </ImageBackground>
           <View style={styles.grid}>
             {visible.map((p) => (
-              <View key={p.id} style={styles.product}>
+              <View key={p.id} style={[styles.product, { backgroundColor: colors.card }]}>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`View ${p.name}`}
                   onPress={() => setDetail(p)}
                 >
                   <Image
-                    source={imageSource(p.photo)}
+                    source={
+                      p.imageUri ? { uri: p.imageUri } : imageSource(p.photo)
+                    }
                     style={styles.productImage}
                   />
-                  <Text style={styles.productBadge}>{p.badge}</Text>
+                  <Text style={[styles.productBadge, { backgroundColor: colors.raised, color: colors.mint }]}>{p.badge}</Text>
                   <View style={{ padding: 12, gap: 4 }}>
                     <Text style={[s.small, { fontSize: 10 }]}>{p.seller}</Text>
                     <Text
@@ -192,7 +245,7 @@ export default function ShopTab() {
                     >
                       {p.name}
                     </Text>
-                    <Text style={{ color: C.orange, fontSize: 10 }}>
+                    <Text style={{ color: colors.orange, fontSize: 10 }}>
                       ★ 4.8 · Sample listing
                     </Text>
                   </View>
@@ -204,7 +257,7 @@ export default function ShopTab() {
                   ]}
                 >
                   <Text
-                    style={{ color: C.mint, fontSize: 17, fontWeight: "800" }}
+                    style={{ color: colors.mint, fontSize: 17, fontWeight: "800" }}
                   >
                     ${p.price.toFixed(2)}
                   </Text>
@@ -212,7 +265,7 @@ export default function ShopTab() {
                     accessibilityRole="button"
                     accessibilityLabel={`Add ${p.name} to cart`}
                     onPress={() => add(p)}
-                    style={styles.add}
+                    style={[styles.add, { backgroundColor: colors.raised }]}
                   >
                     <Icon name="add" size={18} />
                   </Pressable>
@@ -235,7 +288,7 @@ export default function ShopTab() {
             </Card>
           )}
         </>
-      ) : (
+      ) : mode === "Sell" ? (
         <>
           <Card>
             <Label>YOUR FARM. YOUR MARKET.</Label>
@@ -243,6 +296,41 @@ export default function ShopTab() {
             <Text style={s.small}>
               Create a sample listing for your produce, supplies or equipment.
             </Text>
+
+            {/* NEW: Product image picker */}
+            <Text style={[s.small, { marginTop: 8 }]}>Product photo</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Pick product image"
+              onPress={pickImage}
+              style={[styles.imagePicker, { backgroundColor: colors.card, borderColor: colors.line }]}
+            >
+              {imageUri ? (
+                <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+              ) : (
+                <View style={styles.imagePlaceholder}>
+                  <Icon name="camera-outline" size={26} color={colors.muted} />
+                  <Text style={s.small}>Tap to choose from your gallery</Text>
+                </View>
+              )}
+            </Pressable>
+            {imageUri && (
+              <View style={s.row}>
+                <Button
+                  title="Change photo"
+                  secondary
+                  icon="image-outline"
+                  onPress={pickImage}
+                />
+                <Button
+                  title="Remove"
+                  secondary
+                  icon="trash-outline"
+                  onPress={clearImage}
+                />
+              </View>
+            )}
+
             <Field
               label="Product name"
               value={name}
@@ -255,6 +343,14 @@ export default function ShopTab() {
               onChangeText={setPrice}
               numeric
               placeholder="0.00"
+            />
+            {/* NEW: Stock */}
+            <Field
+              label="Stock (units)"
+              value={stock}
+              onChangeText={setStock}
+              numeric
+              placeholder="e.g. 50"
             />
             <ScrollView horizontal contentContainerStyle={{ gap: 8 }}>
               {categories.slice(1).map((c) => (
@@ -274,20 +370,107 @@ export default function ShopTab() {
             )}
           </Card>
           <Text style={s.sectionTitle}>Your listings</Text>
-          {products
-            .filter((p) => p.id.startsWith("local-"))
-            .map((p) => (
-              <Card key={p.id}>
-                <View style={s.between}>
-                  <Text style={s.text}>{p.name}</Text>
-                  <Text style={s.badge}>${p.price.toFixed(2)}</Text>
+          {myListings.map((p) => (
+            <Card key={p.id}>
+              <View style={s.between}>
+                <View style={s.row}>
+                  <Image
+                    source={
+                      p.imageUri ? { uri: p.imageUri } : imageSource(p.photo)
+                    }
+                    style={styles.thumb}
+                  />
+                  <View>
+                    <Text style={s.text}>{p.name}</Text>
+                    <Text style={s.small}>
+                      Stock: {p.stock ?? 0} · Sold: {sold[p.id] ?? 0}
+                    </Text>
+                  </View>
                 </View>
-              </Card>
-            ))}
+                <Text style={s.badge}>${p.price.toFixed(2)}</Text>
+              </View>
+            </Card>
+          ))}
           <Text style={s.small}>
             Preview listings are saved for this session and are not published to
             other users.
           </Text>
+        </>
+      ) : (
+        <>
+          {/* NEW: My Shop dashboard */}
+          <Card>
+            <Label>FARMER DASHBOARD</Label>
+            <Text style={s.title}>{profile.name}&apos;s Shop</Text>
+            <View style={styles.statsRow}>
+              <View style={styles.stat}>
+                <Text style={[styles.statValue, { color: colors.mint }]}>{myListings.length}</Text>
+                <Text style={s.small}>Listings</Text>
+              </View>
+              <View style={styles.stat}>
+                <Text style={[styles.statValue, { color: colors.mint }]}>{itemsSold}</Text>
+                <Text style={s.small}>Items sold</Text>
+              </View>
+              <View style={styles.stat}>
+                <Text style={[styles.statValue, { color: colors.mint }]}>${revenue.toFixed(2)}</Text>
+                <Text style={s.small}>Revenue</Text>
+              </View>
+            </View>
+          </Card>
+
+          <Text style={s.sectionTitle}>All my items</Text>
+          {myListings.length === 0 && (
+            <Card>
+              <Text style={s.small}>You haven&apos;t listed anything yet.</Text>
+              <Button
+                title="Create a listing"
+                icon="add"
+                onPress={() => setMode("Sell")}
+              />
+            </Card>
+          )}
+          {myListings.map((p) => {
+            const soldCount = sold[p.id] ?? 0;
+            const stockLeft = p.stock ?? 0;
+            return (
+              <Card key={p.id}>
+                <View style={s.between}>
+                  <View style={[s.row, { flex: 1 }]}>
+                    <Image
+                      source={
+                        p.imageUri ? { uri: p.imageUri } : imageSource(p.photo)
+                      }
+                      style={styles.thumb}
+                    />
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.text}>{p.name}</Text>
+                      <Text style={s.small}>
+                        {p.category} · ${p.price.toFixed(2)}
+                      </Text>
+                      <View style={[s.row, { marginTop: 4, gap: 8 }]}>
+                        <Pill text={`Stock ${stockLeft}`} />
+                        <Pill text={`Sold ${soldCount}`} active />
+                      </View>
+                    </View>
+                  </View>
+                </View>
+                <Button
+                  title="Record a sale"
+                  secondary
+                  icon="checkmark-circle-outline"
+                  onPress={() => {
+                    if (stockLeft <= 0) return;
+                    setProducts((old) =>
+                      old.map((x) =>
+                        x.id === p.id ? { ...x, stock: (x.stock ?? 0) - 1 } : x,
+                      ),
+                    );
+                    setSold((old) => ({ ...old, [p.id]: (old[p.id] ?? 0) + 1 }));
+                  }}
+                />
+              </Card>
+            );
+          })}
         </>
       )}
       <Sheet
@@ -348,7 +531,11 @@ export default function ShopTab() {
         {detail && (
           <>
             <Image
-              source={imageSource(detail.photo)}
+              source={
+                detail.imageUri
+                  ? { uri: detail.imageUri }
+                  : imageSource(detail.photo)
+              }
               style={[styles.productImage, { height: 220, borderRadius: 14 }]}
             />
             <Text style={s.text}>Sold by {detail.seller}</Text>
@@ -438,4 +625,37 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  // NEW styles
+  imagePicker: {
+    height: 170,
+    borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: C.card,
+    borderWidth: 1,
+    borderColor: "#2A4636",
+    marginVertical: 8,
+  },
+  imagePreview: { width: "100%", height: "100%" },
+  imagePlaceholder: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  thumb: {
+    width: 52,
+    height: 52,
+    borderRadius: 10,
+    backgroundColor: C.raised,
+    marginRight: 10,
+  },
+  statsRow: { flexDirection: "row", gap: 10, marginTop: 12 },
+  stat: {
+    flex: 1,
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: "#1E3A2C",
+    borderRadius: 12,
+  },
+  statValue: { color: C.mint, fontSize: 20, fontWeight: "800" },
 });

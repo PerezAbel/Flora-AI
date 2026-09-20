@@ -16,6 +16,7 @@ export type Post = {
   likes: number;
   liked?: boolean;
   comments: string[];
+  videoUri?: string;
 };
 export type FarmVideo = {
   id: string;
@@ -37,7 +38,7 @@ const initialVideos: FarmVideo[] = [
     handle: "@agro_ai",
     avatar: 47,
     caption:
-      "Small moments in the garden 🌸 Share what’s growing on your farm. #FarmLife #InBloom",
+      "Small moments in the garden. Share what’s growing on your farm. #FarmLife #InBloom",
     likes: 0,
     comments: [],
     sample: true,
@@ -51,6 +52,8 @@ export type Product = {
   category: string;
   photo: string;
   badge: string;
+  imageUri?: string;
+  stock?: number;
 };
 export const photos = {
   farm: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1000&q=85&fit=crop",
@@ -62,6 +65,8 @@ export const photos = {
     "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=900&q=85&fit=crop",
   tools:
     "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&q=85&fit=crop",
+  livestock:
+    "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=900&q=85&fit=crop",
 };
 export const avatar = (id: number) => `https://i.pravatar.cc/100?img=${id}`;
 const initialPosts: Post[] = [
@@ -71,7 +76,7 @@ const initialPosts: Post[] = [
     handle: "@amara_farms · 2h ago",
     avatar: 47,
     image: photos.maize,
-    text: "A little progress, every day 🌽 The maize is looking greener this week. What has worked well on your farm this season?",
+    text: "A little progress, every day. The maize is looking greener this week. What has worked well on your farm this season?",
     tag: "Success Story",
     likes: 284,
     comments: [
@@ -138,7 +143,7 @@ function useAgroState() {
     name: "Kwame Asante",
     handle: "@kwame_asante",
     location: "Kumasi, Ghana 🇬🇭",
-    bio: "3rd generation farmer 🌿 | Maize & Cassava specialist | Using tech to grow smarter",
+    bio: "3rd generation farmer | Maize & Cassava specialist | Using tech to grow smarter",
   });
   const [notifications, setNotifications] = useState([true, true, false, true]);
   return {
@@ -171,6 +176,8 @@ const bundledPhotos: Record<string, number> = {
   [photos.farm]: require("@/assets/images/agro/farm.jpg"),
   [photos.maize]: require("@/assets/images/agro/maize.jpg"),
   [photos.tools]: require("@/assets/images/agro/tools.jpg"),
+  [photos.seeds]: require("@/assets/images/agro/tools.jpg"),
+  [photos.livestock]: require("@/assets/images/agro/livestock.jpg"),
   [photos.vegetables]: require("@/assets/images/agro/vegetables.jpg"),
   [avatar(12)]: require("@/assets/images/agro/avatar-12.jpg"),
   [avatar(47)]: require("@/assets/images/agro/avatar-47.jpg"),

@@ -3,6 +3,7 @@ import { imageSource, photos } from "@/contexts/agro-context";
 import { useState } from "react";
 import { ImageBackground, Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
+import { useTheme } from "@/contexts/theme-context";
 import {
   Button,
   C,
@@ -62,6 +63,7 @@ const devices: {
   },
 ];
 function Trend({ values }: { values: number[] }) {
+  const { colors } = useTheme();
   const [width, setWidth] = useState(280);
   return (
     <View
@@ -75,7 +77,7 @@ function Trend({ values }: { values: number[] }) {
           position: "relative",
           overflow: "hidden",
           borderBottomWidth: 1,
-          borderBottomColor: C.line,
+          borderBottomColor: colors.line,
         }}
       >
         {values.slice(0, -1).map((v, i) => {
@@ -91,7 +93,7 @@ function Trend({ values }: { values: number[] }) {
                 top: y,
                 width: Math.sqrt(dx * dx + dy * dy),
                 height: 2,
-                backgroundColor: C.mint,
+                backgroundColor: colors.mint,
                 transformOrigin: "left center",
                 transform: [{ rotate: `${Math.atan2(dy, dx)}rad` }],
               }}
@@ -110,6 +112,7 @@ function Trend({ values }: { values: number[] }) {
   );
 }
 export default function DashboardTab() {
+  const { colors, mode } = useTheme();
   const [selected, setSelected] = useState(0);
   const [metric, setMetric] = useState("Health");
   const [device, setDevice] = useState<string>();
@@ -126,7 +129,7 @@ export default function DashboardTab() {
     <Page>
       <View style={s.between}>
         <Label>FARM OVERVIEW</Label>
-        <Pill text="ᛒ  Connect device" onPress={() => setPairing(true)} />
+        <Pill text="Connect device" onPress={() => setPairing(true)} />
       </View>
       <View style={{ flexDirection: "row", gap: 7 }}>
         {farms.map((f, i) => (
@@ -137,12 +140,12 @@ export default function DashboardTab() {
             key={f.name}
             style={[
               styles.farmTab,
-              selected === i && { backgroundColor: "#377D5B" },
+              { backgroundColor: selected === i ? colors.mint : colors.card, borderColor: colors.line },
             ]}
           >
             <Text
               style={{
-                color: selected === i ? C.text : C.muted,
+                color: selected === i ? colors.bg : colors.text,
                 fontSize: 11,
                 fontWeight: "700",
               }}
@@ -151,7 +154,7 @@ export default function DashboardTab() {
             </Text>
             <Text
               style={{
-                color: selected === i ? "#C4E2D1" : C.muted,
+                color: selected === i ? colors.bg : colors.muted,
                 fontSize: 9,
                 marginTop: 3,
               }}
@@ -164,16 +167,16 @@ export default function DashboardTab() {
       <ImageBackground
         source={imageSource(photos.farm)}
         imageStyle={{ borderRadius: 17 }}
-        style={styles.hero}
+        style={[styles.hero, { backgroundColor: colors.card }]}
       >
-        <View style={styles.heroOverlay}>
+        <View style={[styles.heroOverlay, { backgroundColor: mode === "dark" ? "rgba(9,30,17,0.32)" : "rgba(255,255,255,0.28)" }]}>
           <View style={s.between}>
             <Text style={s.badge}>DRONE VIEW · DEMO</Text>
             <Pressable
               accessibilityRole="button"
               onPress={() => router.navigate("/current-updates")}
             >
-              <Text style={[s.badge, { color: C.orange }]}>⚠ 1 alert</Text>
+              <View style={[s.row, s.badge]}><Icon name="warning-outline" size={12} color={colors.orange} /><Text style={{ color: colors.orange, fontSize: 10, fontWeight: '700' }}>1 alert</Text></View>
             </Pressable>
           </View>
           <View style={s.between}>
@@ -182,7 +185,7 @@ export default function DashboardTab() {
               <Text style={s.text}>{farm.detail}</Text>
             </View>
             <View>
-              <Text style={[s.value, { color: C.text, fontSize: 32 }]}>
+              <Text style={[s.value, { color: colors.text, fontSize: 32 }] }>
                 {farm.health}%
               </Text>
               <Text style={s.small}>Health</Text>
@@ -219,12 +222,12 @@ export default function DashboardTab() {
             },
           ] as const
         ).map((item, i) => (
-          <View key={item.label} style={styles.metric}>
+          <View key={item.label} style={[styles.metric, { backgroundColor: colors.card }] }>
             <View style={s.between}>
-              <Icon name={item.icon} color={i === 1 ? C.orange : C.mint} />
+              <Icon name={item.icon} color={i === 1 ? colors.orange : colors.mint} />
               <Text style={[s.badge, { fontSize: 9 }]}>{item.badge}</Text>
             </View>
-            <Text style={[s.value, i === 1 && { color: C.orange }]}>
+            <Text style={[s.value, i === 1 && { color: colors.orange }] }>
               {item.value}
             </Text>
             <Text style={s.small}>{item.label}</Text>
@@ -257,7 +260,7 @@ export default function DashboardTab() {
           ].map(([k, v]) => (
             <View key={k}>
               <Text style={s.small}>{k}</Text>
-              <Text style={{ color: C.mint, fontWeight: "700", fontSize: 12 }}>
+              <Text style={{ color: colors.mint, fontWeight: "700", fontSize: 12 }}>
                 {metric === "Temp" && k !== "Trend"
                   ? `${Math.round(parseInt(v) / 4 + 10)}°C`
                   : v}
@@ -281,7 +284,7 @@ export default function DashboardTab() {
               </Text>
               <Text
                 style={{
-                  color: i === 1 ? C.orange : C.mint,
+                  color: i === 1 ? colors.orange : colors.mint,
                   fontWeight: "700",
                   fontSize: 12,
                 }}
@@ -290,13 +293,13 @@ export default function DashboardTab() {
                 <Text style={s.small}>{f.detail.split(" · ")[0]}</Text>
               </Text>
             </View>
-            <View style={styles.track}>
+            <View style={[styles.track, { backgroundColor: colors.line }]}>
               <View
                 style={{
                   width: `${f.health}%`,
                   height: 6,
                   borderRadius: 4,
-                  backgroundColor: i === 1 ? C.orange : C.mint,
+                  backgroundColor: i === 1 ? colors.orange : colors.mint,
                 }}
               />
             </View>
@@ -312,9 +315,9 @@ export default function DashboardTab() {
           accessibilityRole="button"
           key={d.name}
           onPress={() => setDevice(d.name)}
-          style={styles.device}
+          style={[styles.device, { backgroundColor: colors.card }]}
         >
-          <View style={styles.deviceIcon}>
+          <View style={[styles.deviceIcon, { backgroundColor: colors.raised }] }>
             <Icon name={d.icon} />
           </View>
           <View style={{ flex: 1 }}>
@@ -324,10 +327,13 @@ export default function DashboardTab() {
             <Text style={s.small}>{d.kind}</Text>
           </View>
           <View style={{ alignItems: "flex-end" }}>
-            <Text style={{ color: C.mint, fontSize: 10 }}>
+            <Text style={{ color: colors.mint, fontSize: 10 }}>
               ● {simulated ? "Simulated" : "Offline"}
             </Text>
-            <Text style={s.small}>▣ {d.battery}%</Text>
+            <View style={s.row}>
+              <Icon name="battery-half" size={13} color={colors.muted} />
+              <Text style={s.small}>{d.battery}%</Text>
+            </View>
           </View>
         </Pressable>
       ))}

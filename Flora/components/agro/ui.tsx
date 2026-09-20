@@ -13,8 +13,10 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "@/contexts/theme-context";
 
 export function Text({ style, ...props }: TextProps) {
+  const { colors } = useTheme();
   return (
     <NativeText
       {...props}
@@ -26,6 +28,7 @@ export function Text({ style, ...props }: TextProps) {
               : Platform.OS === "ios"
                 ? "System"
                 : "sans-serif",
+          color: colors.text,
         },
         style,
       ]}
@@ -51,12 +54,13 @@ const serverSnapshot = () => false;
 export function Icon({
   name,
   size = 22,
-  color = C.mint,
+  color,
 }: {
   name: IconName;
   size?: number;
   color?: ComponentProps<typeof Ionicons>["color"];
 }) {
+  const { colors } = useTheme();
   // Icon fonts can be preloaded in the browser but unavailable during export.
   // Keep the first client render identical to the server's placeholder.
   const hydrated = useSyncExternalStore(
@@ -65,12 +69,13 @@ export function Icon({
     serverSnapshot,
   );
   if (!hydrated) return <View style={{ width: size, height: size }} />;
-  return <Ionicons name={name} size={size} color={color} accessible={false} />;
+  return <Ionicons name={name} size={size} color={color ?? colors.mint} accessible={false} />;
 }
 export function Page({ children }: PropsWithChildren) {
+  const { colors } = useTheme();
   return (
     <ScrollView
-      style={s.screen}
+      style={[s.screen, { backgroundColor: colors.bg }]}
       contentContainerStyle={s.page}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
@@ -80,7 +85,8 @@ export function Page({ children }: PropsWithChildren) {
   );
 }
 export function Card({ children }: PropsWithChildren) {
-  return <View style={s.card}>{children}</View>;
+  const { colors } = useTheme();
+  return <View style={[s.card, { backgroundColor: colors.card }]}>{children}</View>;
 }
 export function Label({ children }: PropsWithChildren) {
   return <Text style={s.label}>{children}</Text>;
@@ -94,6 +100,7 @@ export function Pill({
   active?: boolean;
   onPress?: () => void;
 }) {
+  const { colors } = useTheme();
   return (
     <Pressable
       disabled={!onPress}
@@ -101,9 +108,9 @@ export function Pill({
       accessibilityLabel={text}
       accessibilityState={{ selected: active }}
       onPress={onPress}
-      style={[s.pill, active && s.pillActive]}
+      style={[s.pill, { backgroundColor: active ? colors.mint : colors.card }, active && s.pillActive]}
     >
-      <Text style={[s.pillText, active && { color: C.bg }]}>{text}</Text>
+      <Text style={[s.pillText, { color: active ? colors.bg : colors.muted }]}>{text}</Text>
     </Pressable>
   );
 }
@@ -120,6 +127,7 @@ export function Button({
   secondary?: boolean;
   disabled?: boolean;
 }) {
+  const { colors } = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
@@ -128,12 +136,13 @@ export function Button({
       onPress={onPress}
       style={({ pressed }) => [
         s.button,
+        { backgroundColor: secondary ? colors.raised : colors.mint },
         secondary && s.secondary,
         (pressed || disabled) && { opacity: 0.55 },
       ]}
     >
-      {icon && <Icon name={icon} size={18} color={secondary ? C.mint : C.bg} />}
-      <Text style={[s.buttonText, secondary && { color: C.mint }]}>
+      {icon && <Icon name={icon} size={18} color={secondary ? colors.mint : colors.bg} />}
+      <Text style={[s.buttonText, { color: secondary ? colors.mint : colors.bg }] }>
         {title}
       </Text>
     </Pressable>
@@ -174,6 +183,7 @@ export function Field({
   multiline?: boolean;
   numeric?: boolean;
 }) {
+  const { colors } = useTheme();
   return (
     <View style={{ gap: 7 }}>
       <Text style={s.small}>{label}</Text>
@@ -182,11 +192,12 @@ export function Field({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={C.muted}
+        placeholderTextColor={colors.muted}
         multiline={multiline}
         keyboardType={numeric ? "decimal-pad" : "default"}
         style={[
           s.input,
+          { backgroundColor: colors.card, borderColor: colors.line, color: colors.text },
           multiline && { minHeight: 110, textAlignVertical: "top" },
         ]}
       />
@@ -203,6 +214,7 @@ export function Sheet({
   title: string;
   onClose: () => void;
 }>) {
+  const { colors } = useTheme();
   return (
     <Modal
       visible={visible}
@@ -211,7 +223,7 @@ export function Sheet({
       onRequestClose={onClose}
     >
       <View style={s.scrim}>
-        <SafeAreaView style={s.sheet}>
+        <SafeAreaView style={[s.sheet, { backgroundColor: colors.bg }]}>
           <View style={s.between}>
             <Text style={s.sectionTitle}>{title}</Text>
             <IconButton name="close" label="Close" onPress={onClose} />

@@ -3,11 +3,13 @@ import { Stack } from "expo-router";
 import { LanguageProvider } from "@/contexts/language-context";
 import { AgentDataProvider } from "@/contexts/agent-data-context";
 import { ChatHistoryProvider } from "@/contexts/chat-history-context";
+import { ThemeProvider } from "@/contexts/theme-context";
 
 export default function RootLayout() {
   return (
-    <LanguageProvider>
-      <AgroProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AgroProvider>
         <AgentDataProvider>
           <ChatHistoryProvider>
             <Stack screenOptions={{ headerShown: false }}>
@@ -36,7 +38,8 @@ export default function RootLayout() {
             </Stack>
           </ChatHistoryProvider>
         </AgentDataProvider>
-      </AgroProvider>
-    </LanguageProvider>
+        </AgroProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }

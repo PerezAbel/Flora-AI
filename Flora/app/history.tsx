@@ -1,38 +1,42 @@
 import { useAgentData } from '@/contexts/agent-data-context';
+import { imageSource, photos } from '@/contexts/agro-context';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useLanguage } from '@/contexts/language-context';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTheme } from '@/contexts/theme-context';
 
 export default function HistoryScreen() {
   const { tr } = useLanguage();
+  const { colors } = useTheme();
   const { scanHistory } = useAgentData();
   const params = useLocalSearchParams<{ type?: string }>();
   const mode = params.type === 'animal' ? 'animal' : 'crop';
   const entries = scanHistory.filter((entry) => entry.mode === mode);
 
   return (
-    <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
+    <ScrollView contentContainerStyle={styles.content} style={[styles.screen, { backgroundColor: colors.bg }]}>
       <View style={styles.headerRow}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons color="#0F172A" name="chevron-back" size={20} />
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons color={colors.muted} name="chevron-back" size={20} />
         </Pressable>
-        <Text style={styles.title}>{mode === 'animal' ? tr('Animal Scan History') : tr('Crop Scan History')}</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{mode === 'animal' ? tr('Animal Scan History') : tr('Crop Scan History')}</Text>
       </View>
-      <Text style={styles.subTitle}>{tr('All recent scans and classification results')}</Text>
+      <Text style={[styles.subTitle, { color: colors.muted }]}>{tr('All recent scans and classification results')}</Text>
 
       {entries.map((entry) => (
-        <View key={entry.id} style={styles.card}>
+        <View key={entry.id} style={[styles.card, { backgroundColor: colors.card, borderColor: colors.line }]}>
+          <Image source={imageSource(entry.imageUri ?? (mode === 'animal' ? photos.livestock : photos.maize))} style={styles.resultImage} accessibilityLabel={`${mode === 'animal' ? 'Animal' : 'Crop'} scan`} />
           <View style={styles.rowTop}>
-            <Text style={styles.item}>{tr(entry.item)}</Text>
+            <Text style={[styles.item, { color: colors.text }]}>{tr(entry.item)}</Text>
             <View style={styles.confidenceBadge}>
-              <Text style={styles.confidenceText}>{entry.confidence}</Text>
+              <Text style={[styles.confidenceText, { color: colors.mint }]}>{entry.confidence}</Text>
             </View>
           </View>
-          <Text style={styles.result}>{tr(entry.result)}</Text>
+          <Text style={[styles.result, { color: colors.text }]}>{tr(entry.result)}</Text>
           <View style={styles.timeRow}>
-            <Ionicons color="#64748B" name="time-outline" size={14} />
-            <Text style={styles.time}>{tr(entry.time)}</Text>
+            <Ionicons color={colors.muted} name="time-outline" size={14} />
+            <Text style={[styles.time, { color: colors.muted }]}>{tr(entry.time)}</Text>
           </View>
         </View>
       ))}
@@ -117,4 +121,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginLeft: 5,
   },
+  resultImage: { width: '100%', height: 150, borderRadius: 10, marginBottom: 10 },
 });
