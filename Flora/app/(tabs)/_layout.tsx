@@ -62,7 +62,7 @@ export default function TabLayout() {
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="community"
         options={{
           title: "Feed",
@@ -71,7 +71,8 @@ export default function TabLayout() {
             <Icon name="home" color={color} size={size} />
           ),
         }}
-      />
+      /> */}
+      <Tabs.Screen name="community" options={{ href: null }} />
       <Tabs.Screen
         name="dashboard"
         options={{

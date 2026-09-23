@@ -17,6 +17,16 @@ import { useTheme } from "@/contexts/theme-context";
 
 export function Text({ style, ...props }: TextProps) {
   const { colors } = useTheme();
+  const flattened = StyleSheet.flatten(style) as { color?: string } | undefined;
+  const themedColor = flattened?.color === C.text
+    ? colors.text
+    : flattened?.color === C.muted
+      ? colors.muted
+      : flattened?.color === C.mint
+        ? colors.mint
+        : flattened?.color === C.orange
+          ? colors.orange
+        : undefined;
   return (
     <NativeText
       {...props}
@@ -31,6 +41,7 @@ export function Text({ style, ...props }: TextProps) {
           color: colors.text,
         },
         style,
+        themedColor ? { color: themedColor } : null,
       ]}
     />
   );
