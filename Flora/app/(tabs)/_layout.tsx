@@ -1,5 +1,6 @@
 import { C, Icon, IconButton, s, Text } from "@/components/agro/ui";
 import { avatar, imageSource } from "@/contexts/agro-context";
+import { useTheme } from "@/contexts/theme-context";
 import { router, Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Image, Pressable, StyleSheet, View } from "react-native";
@@ -7,7 +8,6 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { useTheme } from "@/contexts/theme-context";
 
 function Header({ title, eyebrow }: { title: string; eyebrow: string }) {
   const { colors, mode } = useTheme();
@@ -78,7 +78,7 @@ export default function TabLayout() {
         options={{
           title: "FARM",
           tabBarLabel: "Farm",
-          header: () => <Header title="My Farm" eyebrow="" />,
+          header: () => <Header title="Dashboard" eyebrow="" />,
           tabBarIcon: ({ color, size }) => (
             <Icon name="grid" color={color} size={size} />
           ),
@@ -87,7 +87,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Farm Assistant",
+          title: "Farm AI",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Icon name="sparkles" color={color} size={size} />
           ),
@@ -98,9 +99,20 @@ export default function TabLayout() {
         options={{
           title: "Market",
           tabBarLabel: "Shop",
-          header: () => <Header title="Shop&Market" eyebrow="" />,
+          header: () => <Header title="Market" eyebrow="" />,
           tabBarIcon: ({ color, size }) => (
             <Icon name="bag-handle" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="nearby-care"
+        options={{
+          title: "Nearby Care",
+          tabBarLabel: "Nearby Care",
+          header: () => <Header title="Vets & Care" eyebrow="" />,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="medical-outline" color={color} size={size} />
           ),
         }}
       />

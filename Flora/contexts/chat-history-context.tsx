@@ -49,7 +49,7 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
     const now = Date.now();
     setSessions((prev) =>
       prev
-        .map((session) =>
+        .map((session): ChatSession =>
           session.id !== sessionId
             ? session
             : {

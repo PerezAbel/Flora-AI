@@ -1,150 +1,59 @@
-import { FontAwesome } from '@expo/vector-icons';
-import { useLanguage } from '@/contexts/language-context';
-import { router } from 'expo-router';
+import { Icon, type IconName } from '@/components/agro/ui';
+import { useTheme } from '@/contexts/theme-context';
+import { router, type Href } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const NAV_ITEMS = [
-  { label: 'Agent History', route: '/history' },
-  { label: 'Agent Settings', route: '/settings' },
-  { label: 'Agent Profile', route: '/profile' },
-  { label: 'Agent Alerts', route: '/current-updates' },
-  { label: 'Agent Feedback', route: '/recommendations' },
-  { label: 'Agent Animal Well Being', route: '/animal-well-being' },
+const navigation: { label: string; route: Href; icon: IconName }[] = [
+  { label: 'Scan History', route: '/history', icon: 'scan-outline' },
+  { label: 'Chat History', route: '/chat-history', icon: 'chatbubbles-outline' },
 ];
 
-export default function AppTopBar() {
-  const { tr } = useLanguage();
+export default function AppTopBar({ dark = false }: { dark?: boolean }) {
+  const { colors } = useTheme();
   const [open, setOpen] = useState(false);
-
+  const foreground = dark ? '#C4F9D3' : colors.text;
   return (
-    <View style={styles.wrap}>
-      <View style={styles.row}>
-        <Pressable onPress={() => setOpen((v) => !v)} style={styles.iconButton}>
-          <View style={styles.menuIcon}>
-            <View style={[styles.menuLine, styles.lineOne]} />
-            <View style={[styles.menuLine, styles.lineTwo]} />
-            <View style={[styles.menuLine, styles.lineThree]} />
-          </View>
-        </Pressable>
-
-        <Pressable onPress={() => router.push('/profile')} style={styles.iconButton}>
-          <View style={styles.profileWrap}>
-            <FontAwesome name="user" size={18} color="#123524" />
-            <View style={styles.plusBadge}>
-              <FontAwesome name="plus" size={10} color="#fff" />
+    <View style={styles.bar}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Open side navigation" onPress={() => setOpen(true)} style={styles.button}>
+        <Icon name="menu-outline" color={foreground} size={25} />
+      </Pressable>
+      <Text style={[styles.brand, { color: foreground }]}>FLORA AI</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel="My profile" onPress={() => router.push('/profile')} style={styles.button}>
+        <Icon name="person-circle-outline" color={foreground} size={26} />
+      </Pressable>
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <View style={styles.overlay}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Close side navigation" onPress={() => setOpen(false)} style={StyleSheet.absoluteFill} />
+          <SafeAreaView style={[styles.drawer, { backgroundColor: colors.bg }]}>
+            <View style={styles.bar}>
+              <Text style={[styles.brand, { color: colors.mint }]}>FLORA AI</Text>
+              <Pressable accessibilityRole="button" accessibilityLabel="Close menu" onPress={() => setOpen(false)} style={styles.button}>
+                <Icon name="close" />
+              </Pressable>
             </View>
-          </View>
-        </Pressable>
-      </View>
-
-      {open ? <Pressable onPress={() => setOpen(false)} style={styles.backdrop} /> : null}
-
-      <View style={[styles.drawer, open ? styles.drawerOpen : null]}>
-        <Pressable onPress={() => setOpen(false)} style={styles.closeButton}>
-          <FontAwesome name="close" size={18} color="#123524" />
-        </Pressable>
-
-        {NAV_ITEMS.map((item) => (
-          <Pressable
-            key={item.label}
-            onPress={() => {
-              setOpen(false);
-              router.push(item.route as never);
-            }}
-            style={styles.menuItem}
-          >
-            <Text style={styles.menuText}>{tr(item.label)}</Text>
-          </Pressable>
-        ))}
-      </View>
+            <ScrollView>
+              {navigation.map((item) => (
+                <Pressable key={item.label} accessibilityRole="button" onPress={() => { setOpen(false); router.push(item.route); }} style={styles.link}>
+                  <Icon name={item.icon} size={21} />
+                  <Text style={[styles.linkText, { color: colors.text }]}>{item.label}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </SafeAreaView>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    marginBottom: 12,
-    position: 'relative',
-    zIndex: 20,
-  },
-  row: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  iconButton: {
-    alignItems: 'center',
-    backgroundColor: '#E5F4E8',
-    borderRadius: 12,
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  menuIcon: {
-    gap: 3,
-    width: 22,
-  },
-  menuLine: {
-    backgroundColor: '#123524',
-    borderRadius: 999,
-    height: 2,
-  },
-  lineOne: { width: 22 },
-  lineTwo: { width: 16 },
-  lineThree: { width: 10 },
-  profileWrap: { alignItems: 'center', justifyContent: 'center' },
-  plusBadge: {
-    alignItems: 'center',
-    backgroundColor: '#2A6A4A',
-    borderRadius: 999,
-    bottom: -2,
-    height: 14,
-    justifyContent: 'center',
-    position: 'absolute',
-    right: -9,
-    width: 14,
-  },
-  backdrop: {
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    bottom: -1000,
-    left: -20,
-    position: 'absolute',
-    right: -20,
-    top: -20,
-    zIndex: 24,
-  },
-  drawer: {
-    backgroundColor: '#F5FBF6',
-    borderColor: '#D0E8D6',
-    borderRightWidth: 1,
-    bottom: -1000,
-    left: -280,
-    paddingHorizontal: 10,
-    paddingTop: 56,
-    position: 'absolute',
-    top: -20,
-    width: 260,
-    zIndex: 25,
-  },
-  closeButton: {
-    alignItems: 'center',
-    height: 36,
-    justifyContent: 'center',
-    position: 'absolute',
-    right: 10,
-    top: 12,
-    width: 36,
-  },
-  drawerOpen: { left: -20 },
-  menuItem: {
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  menuText: {
-    color: '#123524',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  bar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 48 },
+  button: { width: 44, height: 44, justifyContent: 'center', alignItems: 'center' },
+  brand: { fontSize: 12, fontWeight: '700', letterSpacing: 3 },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)' },
+  drawer: { width: '86%', maxWidth: 340, height: '100%', paddingHorizontal: 20, gap: 12 },
+  link: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 54 },
+  linkText: { fontSize: 14, fontWeight: '600', flex: 1 },
 });

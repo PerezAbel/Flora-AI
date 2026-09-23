@@ -14,6 +14,7 @@ import {
 } from "@/components/agro/ui";
 import { imageSource, photos, useAgro, type Product } from "@/contexts/agro-context";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   Image,
@@ -516,10 +517,14 @@ export default function ShopTab() {
               <Text style={s.sectionTitle}>Total</Text>
               <Text style={s.value}>${total.toFixed(2)}</Text>
             </View>
-            <Text style={s.small}>
-              This is a marketplace preview. Checkout and payments are not
-              available yet.
-            </Text>
+            <Button
+              title="Proceed to checkout"
+              icon="arrow-forward"
+              onPress={() => {
+                setShowCart(false);
+                router.push("/checkout");
+              }}
+            />
           </>
         )}
       </Sheet>

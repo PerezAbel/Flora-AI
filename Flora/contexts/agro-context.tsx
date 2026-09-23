@@ -4,6 +4,7 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
+import type { VetListing } from '@/services/vet-directory';
 
 export type Post = {
   id: string;
@@ -135,6 +136,7 @@ const initialProducts: Product[] = [
   },
 ];
 function useAgroState() {
+  const [vetListings, setVetListings] = useState<VetListing[]>([]);
   const [posts, setPosts] = useState(initialPosts);
   const [videos, setVideos] = useState<FarmVideo[]>(initialVideos);
   const [products, setProducts] = useState(initialProducts);
@@ -147,6 +149,8 @@ function useAgroState() {
   });
   const [notifications, setNotifications] = useState([true, true, false, true]);
   return {
+    vetListings,
+    setVetListings,
     posts,
     setPosts,
     videos,

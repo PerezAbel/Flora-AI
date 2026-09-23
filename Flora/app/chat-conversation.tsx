@@ -2,7 +2,8 @@ import { useChatHistory } from '@/contexts/chat-history-context';
 import { useLanguage } from '@/contexts/language-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useRef, useState } from 'react';
+import { buildCareReply, careGuidance } from '@/services/care-guidance';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function ChatConversationScreen() {
@@ -12,28 +13,12 @@ export default function ChatConversationScreen() {
   const session = params.sessionId ? getSession(params.sessionId) : undefined;
   const mode = session?.agent === 'animal' ? 'animal' : 'crop';
   const [input, setInput] = useState('');
-
-  const buildSampleReply = useCallback(
-    (prompt: string) => {
-      const value = prompt.toLowerCase();
-      if (value.includes('rust') || value.includes('leaf')) {
-        return tr('Sample: Leaf rust risk is medium. Re-scan in 48 hours and apply preventive fungicide.');
-      }
-      if (value.includes('animal') || value.includes('cow') || value.includes('goat') || mode === 'animal') {
-        return tr('Sample: Animal health looks stable. Monitor temperature and isolate any weak animal.');
-      }
-      if (value.includes('weather') || value.includes('rain')) {
-        return tr('Sample: Rain is expected tomorrow. Increase disease checks in wet field zones.');
-      }
-      return tr('Sample: I can help with disease risk, scan history, and treatment recommendations.');
-    },
-    [mode, tr]
-  );
+  const scroll = useRef<ScrollView>(null);
 
   const ask = () => {
-    const q = input.trim();
-    if (!q || !session?.id) return;
-    addExchange(session.id, q, buildSampleReply(q));
+    const question = input.trim();
+    if (!question || !session?.id) return;
+    addExchange(session.id, question, buildCareReply(mode));
     setInput('');
   };
 
@@ -46,10 +31,15 @@ export default function ChatConversationScreen() {
         <Text style={styles.title}>{tr('Chat with Agent')}</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.chatContent} style={styles.chatScroll}>
+      <ScrollView ref={scroll} onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: true })} contentContainerStyle={styles.chatContent} style={styles.chatScroll}>
         {(session?.messages ?? []).map((msg) => (
           <View key={msg.id} style={[styles.bubble, msg.role === 'user' ? styles.questionBubble : styles.responseBubble]}>
             <Text style={styles.bubbleText}>{msg.text}</Text>
+            {msg.role === 'assistant' && (
+              <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/nearby-care', params: { category: careGuidance[mode].search } })} style={{ paddingVertical: 12 }}>
+                <Text style={[styles.bubbleText, { textDecorationLine: 'underline' }]}>Find nearby {mode === 'animal' ? 'vets & animal facilities' : 'plant doctors & crop facilities'}</Text>
+              </Pressable>
+            )}
           </View>
         ))}
         {!session ? <Text style={styles.emptyText}>{tr('Chat not found. Start from Home to create a new conversation.')}</Text> : null}

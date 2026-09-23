@@ -11,8 +11,8 @@ export default function HistoryScreen() {
   const { colors } = useTheme();
   const { scanHistory } = useAgentData();
   const params = useLocalSearchParams<{ type?: string }>();
-  const mode = params.type === 'animal' ? 'animal' : 'crop';
-  const entries = scanHistory.filter((entry) => entry.mode === mode);
+  const mode = params.type === 'animal' ? 'animal' : params.type === 'crop' ? 'crop' : undefined;
+  const entries = scanHistory.filter((entry) => !mode || entry.mode === mode);
 
   return (
     <ScrollView contentContainerStyle={styles.content} style={[styles.screen, { backgroundColor: colors.bg }]}>
@@ -20,13 +20,14 @@ export default function HistoryScreen() {
           <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Ionicons color={colors.muted} name="chevron-back" size={20} />
         </Pressable>
-        <Text style={[styles.title, { color: colors.text }]}>{mode === 'animal' ? tr('Animal Scan History') : tr('Crop Scan History')}</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{mode === 'animal' ? tr('Animal Scan History') : mode === 'crop' ? tr('Crop Scan History') : tr('Scan History')}</Text>
       </View>
-      <Text style={[styles.subTitle, { color: colors.muted }]}>{tr('All recent scans and classification results')}</Text>
+      <Text style={[styles.subTitle, { color: colors.muted }]}>{tr('Recent scans and care previews saved during this app session')}</Text>
+      {!entries.length && <Text style={{ color: colors.muted }}>No scans yet. Take or upload a photo from Farm AI.</Text>}
 
       {entries.map((entry) => (
         <View key={entry.id} style={[styles.card, { backgroundColor: colors.card, borderColor: colors.line }]}>
-          <Image source={imageSource(entry.imageUri ?? (mode === 'animal' ? photos.livestock : photos.maize))} style={styles.resultImage} accessibilityLabel={`${mode === 'animal' ? 'Animal' : 'Crop'} scan`} />
+          <Image source={imageSource(entry.imageUri ?? (entry.mode === 'animal' ? photos.livestock : photos.maize))} style={styles.resultImage} accessibilityLabel={`${entry.mode === 'animal' ? 'Animal' : 'Crop'} scan`} />
           <View style={styles.rowTop}>
             <Text style={[styles.item, { color: colors.text }]}>{tr(entry.item)}</Text>
             <View style={styles.confidenceBadge}>

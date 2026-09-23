@@ -39,6 +39,7 @@ export type ScanEntry = {
 type AgentDataContextValue = {
   alerts: AlertItem[];
   scanHistory: ScanEntry[];
+  recordCareScan: (mode: AgentMode, imageUri: string, symptoms: string) => void;
   addUploadedSnapshot: (mode: AgentMode, imageUri?: string) => Promise<ScanEntry>;
   addQuickScan: (mode: AgentMode) => Promise<ScanEntry>;
   addLiveMonitoringUpdate: (mode: AgentMode) => Promise<ScanEntry>;
@@ -227,6 +228,18 @@ export function AgentDataProvider({ children }: { children: ReactNode }) {
     () => ({
       alerts,
       scanHistory,
+      recordCareScan: (mode, imageUri, symptoms) => {
+        setScanHistory((previous) => [{
+          id: `care-${Date.now()}`,
+          mode,
+          item: mode === 'crop' ? 'Plant care preview' : 'Animal care preview',
+          result: 'General guidance only — photo not analyzed',
+          confidence: 'Not assessed',
+          time: nowLabel(),
+          imageUri,
+          description: symptoms,
+        }, ...previous]);
+      },
       addUploadedSnapshot: (mode: AgentMode, imageUri?: string) => createGeneratedScan(mode, 'upload', imageUri),
       addQuickScan: (mode: AgentMode) => createGeneratedScan(mode, 'scan'),
       addLiveMonitoringUpdate: (mode: AgentMode) => createGeneratedScan(mode, 'live'),
