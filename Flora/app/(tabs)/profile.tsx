@@ -1,12 +1,12 @@
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ProfileSettings } from "@/components/agro/profile-settings";
 import { Text } from "@/components/agro/ui";
-import { imageSource, avatar, photos, useAgro } from "@/contexts/agro-context";
+import { imageSource, avatar, useAgro } from "@/contexts/agro-context";
 import { useState } from "react";
 import {
   Image,
-  ImageBackground,
   Pressable,
   StyleSheet,
-  Switch,
   View,
 } from "react-native";
 import { router } from "expo-router";
@@ -25,7 +25,7 @@ import {
 } from "@/components/agro/ui";
 
 export default function ProfileTab() {
-  const { profile, setProfile, notifications, setNotifications, posts } =
+  const { profile, setProfile } =
     useAgro();
   const { colors } = useTheme();
   const { scanHistory } = useAgentData();
@@ -41,110 +41,10 @@ export default function ProfileTab() {
     { title: "Help & Support", icon: "help-buoy" },
   ];
   return (
+    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: "#1C6035" }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, backgroundColor: "#1C6035" }}><Image source={imageSource(avatar(12))} style={{ width: 52, height: 52, borderRadius: 26 }} /><View style={{ flex: 1 }}><Text style={{ color: "#FFFFFF", fontFamily: "serif", fontSize: 21, fontWeight: "700" }}>{profile.name}</Text><Text style={{ color: "#D0E4D4", fontSize: 11 }}>{profile.location}</Text></View><Pressable accessibilityRole="button" accessibilityLabel="Edit profile" onPress={() => { setDraft(profile); setEdit(true); }}><Icon name="create-outline" color="#FFFFFF" /></Pressable></View>
     <Page>
-      <ImageBackground
-        source={imageSource(photos.farm)}
-        style={[styles.cover, { backgroundColor: colors.card }]}
-        imageStyle={{ borderRadius: 16 }}
-      >
-        <View style={styles.coverShade} />
-      </ImageBackground>
-      <View style={[s.between, { marginTop: -55, alignItems: "flex-end" }]}>
-        <View>
-          <Image source={imageSource(avatar(12))} style={[styles.avatar, { borderColor: colors.bg, backgroundColor: colors.raised }]} />
-          <View style={[styles.verified, { backgroundColor: colors.mint }]}>
-            <Icon name="leaf" size={15} color={colors.bg} />
-          </View>
-        </View>
-        <Button
-          title="Edit Profile"
-          secondary
-          onPress={() => {
-            setDraft(profile);
-            setEdit(true);
-          }}
-        />
-      </View>
-      <View style={{ gap: 5 }}>
-        <View style={s.row}>
-          <Text style={s.title}>{profile.name}</Text>
-          <Icon name="leaf" size={16} />
-        </View>
-        <Text style={s.small}>
-          {profile.handle} · {profile.location}
-        </Text>
-        <Text style={[s.text, { marginTop: 5 }]}>{profile.bio}</Text>
-      </View>
-      <View style={[styles.stats, { backgroundColor: colors.card }]}>
-        {[
-          [
-            String(
-              posts.filter((p) => p.handle.startsWith(profile.handle)).length,
-            ),
-            "Posts",
-          ],
-          ["1.2K", "Followers"],
-          ["234", "Following"],
-          [String(scanHistory.length), "Scans"],
-        ].map(([v, k]) => (
-          <View style={{ alignItems: "center", gap: 4 }} key={k}>
-            <Text style={{ color: colors.mint, fontSize: 18, fontWeight: "800" }}>
-              {v}
-            </Text>
-            <Text style={[s.small, { fontSize: 10 }]}>{k}</Text>
-          </View>
-        ))}
-      </View>
-      <Text style={s.sectionTitle}>Badges Earned</Text>
-      <View style={s.row}>
-        {[
-          ["leaf-outline", "Crop Expert", "50+ scans"],
-          ["people-outline", "Community Pro", "Top contributor"],
-          ["ribbon-outline", "Harvest Hero", "1K+ followers"],
-        ].map(([icon, title, sub]) => (
-          <View style={[styles.badgeCard, { backgroundColor: colors.card }]} key={title}>
-                <Icon name={icon as import('@/components/agro/ui').IconName} size={27} />
-            <Text
-              style={{
-                color: colors.text,
-                fontSize: 10,
-                fontWeight: "700",
-                textAlign: "center",
-              }}
-            >
-              {title}
-            </Text>
-            <Text style={{ color: colors.muted, fontSize: 8 }}>{sub}</Text>
-          </View>
-        ))}
-      </View>
-      <Text style={[s.small, { fontSize: 10 }]}>
-        Sample profile · follower counts and badges are illustrative
-      </Text>
-      <Text style={s.sectionTitle}>Notifications</Text>
-      <View style={[styles.group, { backgroundColor: colors.card }]}>
-        {[
-          "Disease Alerts",
-          "Community Posts",
-          "Market Deals",
-          "Weather Alerts",
-        ].map((name, i) => (
-          <View style={[styles.setting, i < 3 && styles.line]} key={name}>
-            <View style={s.row}><Icon name={(["warning-outline", "people-outline", "pricetag-outline", "sunny-outline"] as const)[i]} size={18} /><Text style={s.text}>{name}</Text></View>
-            <Switch
-              accessibilityLabel={name}
-              value={notifications[i]}
-              onValueChange={(value) =>
-                setNotifications((old) =>
-                  old.map((v, j) => (j === i ? value : v)),
-                )
-              }
-              trackColor={{ false: colors.line, true: colors.raised }}
-              thumbColor={notifications[i] ? colors.mint : colors.muted}
-            />
-          </View>
-        ))}
-      </View>
+      <ProfileSettings />
       <Text style={s.sectionTitle}>Account</Text>
       <View style={[styles.group, { backgroundColor: colors.card }]}>
         {settings.map((item, i) => (
@@ -278,7 +178,7 @@ export default function ProfileTab() {
           </>
         )}
       </Sheet>
-    </Page>
+    </Page></SafeAreaView>
   );
 }
 const styles = StyleSheet.create({

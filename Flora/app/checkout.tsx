@@ -16,7 +16,7 @@ const paymentMethods = [
 type PaymentMethod = typeof paymentMethods[number]["id"];
 type Receipt = { reference: string; total: number; method: string; count: number };
 
-const money = (amount: number) => `USD $${amount.toFixed(2)}`;
+const money = (amount: number) => `KES ${amount.toFixed(2)}`;
 const createDemoReference = () => `DEMO-${Date.now()}`;
 
 export default function CheckoutScreen() {
@@ -145,7 +145,7 @@ export default function CheckoutScreen() {
                 ))}
                 <Text style={s.small}>
                   {method === "mpesa"
-                    ? "Demo only: no M-Pesa prompt will be sent. Prices remain in USD; no KES conversion or charge is performed."
+                    ? "Demo only: no M-Pesa prompt will be sent. Prices are in KES; no charge is performed."
                     : method === "paypal"
                       ? "Demo only: you will not be redirected to PayPal or asked to sign in."
                       : "Demo only: no card number, expiry date or security code is needed."}

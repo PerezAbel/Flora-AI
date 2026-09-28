@@ -2,8 +2,8 @@ import { createContext, useContext, useMemo, useState, type PropsWithChildren } 
 
 export type ThemeMode = 'light' | 'dark';
 export const themeColors = {
-  dark: { bg: '#171A19', card: '#242A27', raised: '#303A34', mint: '#79CBA4', muted: '#A6B2AB', text: '#F4F7F4', line: '#3A4740', orange: '#EE8B36' },
-  light: { bg: '#FFFFFF', card: '#EEF7F0', raised: '#CDE6D4', mint: '#1E6B3B', muted: '#4E6656', text: '#132218', line: '#B8D3BE', orange: '#B95D16' },
+  dark: { bg: '#101B12', card: '#182317', raised: '#202D20', mint: '#4BB477', muted: '#A6B2AB', text: '#F4F7F4', line: '#304531', orange: '#EE8B36' },
+  light: { bg: '#F7F5F0', card: '#FFFFFF', raised: '#EEECE6', mint: '#1E6B3B', muted: '#818477', text: '#2d2d2d', line: '#DEDAD2', orange: '#B95D16' },
 } as const;
 
 type ThemeContextValue = { mode: ThemeMode; colors: typeof themeColors.dark; setMode: (mode: ThemeMode) => void; toggle: () => void };

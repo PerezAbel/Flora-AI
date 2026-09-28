@@ -71,69 +71,14 @@ export const photos = {
 };
 export const avatar = (id: number) => `https://i.pravatar.cc/100?img=${id}`;
 const initialPosts: Post[] = [
-  {
-    id: "p1",
-    name: "Amara Diallo",
-    handle: "@amara_farms · 2h ago",
-    avatar: 47,
-    image: photos.maize,
-    text: "A little progress, every day. The maize is looking greener this week. What has worked well on your farm this season?",
-    tag: "Success Story",
-    likes: 284,
-    comments: [
-      "The field looks wonderful!",
-      "Regular field checks have helped us a lot.",
-    ],
-  },
-  {
-    id: "p2",
-    name: "Kwame Mensah",
-    handle: "@kwame_agri · 5h ago",
-    avatar: 12,
-    image: photos.farm,
-    text: "Spotted changes in a few leaves during my morning walk. Keeping a record and checking with our local agronomist. How do you track crop health?",
-    tag: "Field Notes",
-    likes: 126,
-    comments: [],
-  },
+  { id: "p1", name: "Samuel Oduya", handle: "Kakamega · 35m ago", avatar: 12, image: photos.seeds, text: "My maize leaves have yellow stripes — could this be Maize Streak Virus? The symptoms appeared 3 days ago after heavy rain.", tag: "Crop Issues", likes: 24, comments: [] },
+  { id: "p2", name: "Agnes Mutua", handle: "Machakos · 2h ago", avatar: 47, text: "My goat has been off-feed for 2 days, slightly bloated on left side. Has anyone experienced this? Looking for a local vet.", tag: "Animal Health", likes: 8, comments: [] },
 ];
 const initialProducts: Product[] = [
-  {
-    id: "1",
-    name: "Garden Hand Tool Set",
-    seller: "AgroChemKe",
-    price: 24.99,
-    category: "Equipment",
-    photo: photos.tools,
-    badge: "Best Seller",
-  },
-  {
-    id: "2",
-    name: "Organic Compost · 20kg",
-    seller: "FarmSupply",
-    price: 38.5,
-    category: "Fertilizers",
-    photo: photos.farm,
-    badge: "Top Rated",
-  },
-  {
-    id: "3",
-    name: "Organic Maize Seeds",
-    seller: "GreenSeed",
-    price: 12.99,
-    category: "Seeds",
-    photo: photos.maize,
-    badge: "Organic",
-  },
-  {
-    id: "4",
-    name: "Fresh Farm Produce Box",
-    seller: "Harvest Hub",
-    price: 18,
-    category: "Produce",
-    photo: photos.vegetables,
-    badge: "New",
-  },
+  { id: "1", name: "Fresh Tomatoes", seller: "John Mwangi · Nakuru", price: 80, category: "Vegetables", photo: photos.vegetables, badge: "Vegetables" },
+  { id: "2", name: "Grade A Maize", seller: "Mary Wanjiku · Eldoret", price: 45, category: "Cereals", photo: photos.seeds, badge: "Cereals" },
+  { id: "3", name: "Fresh Milk (Raw)", seller: "Peter Njoroge · Kiambu", price: 60, category: "Dairy", photo: photos.livestock, badge: "Dairy" },
+  { id: "4", name: "French Beans", seller: "Grace Achieng · Meru", price: 120, category: "Vegetables", photo: photos.tools, badge: "Vegetables" },
 ];
 function useAgroState() {
   const [vetListings, setVetListings] = useState<VetListing[]>([]);
@@ -147,8 +92,11 @@ function useAgroState() {
     location: "Kumasi, Ghana 🇬🇭",
     bio: "3rd generation farmer | Maize & Cassava specialist | Using tech to grow smarter",
   });
+  const [metric, setMetric] = useState(true);
   const [notifications, setNotifications] = useState([true, true, false, true]);
   return {
+    metric,
+    setMetric,
     vetListings,
     setVetListings,
     posts,

@@ -1,3 +1,4 @@
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Button,
   C,
@@ -18,7 +19,6 @@ import { router } from "expo-router";
 import { useState } from "react";
 import {
   Image,
-  ImageBackground,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -29,6 +29,10 @@ import { useTheme } from "@/contexts/theme-context";
 
 const categories = [
   "All",
+  "Vegetables",
+  "Cereals",
+  "Dairy",
+  "Livestock",
   "Seeds",
   "Fertilizers",
   "Pesticides",
@@ -41,6 +45,7 @@ export default function ShopTab() {
   const [mode, setMode] = useState("Buy");
   const [category, setCategory] = useState("All");
   const [query, setQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [detail, setDetail] = useState<Product>();
   const [name, setName] = useState("");
@@ -125,7 +130,8 @@ export default function ShopTab() {
   );
 
   return (
-    <Page>
+    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: colors.bg }}><Page>
+      <View style={s.between}><Text style={{ fontFamily: "serif", fontSize: 22, fontWeight: "700" }}>Marketplace</Text><Pressable accessibilityRole="button" accessibilityLabel={`Cart, ${count} items`} onPress={() => setShowCart(true)} style={styles.cart}><Icon name="cart-outline" size={20} /><Text style={s.small}>{count || ""}</Text></Pressable></View>
       <View style={s.row}>
         <View style={[styles.segment, { backgroundColor: colors.card }] }>
           {["Buy", "Sell", "My Shop"].map((m) => (
@@ -140,49 +146,29 @@ export default function ShopTab() {
               }}
               style={[
                 styles.segmentItem,
-                { backgroundColor: mode === m ? colors.mint : colors.card },
+                { backgroundColor: mode === m ? colors.bg : colors.card },
               ]}
             >
-              <Icon
-                name={
-                  m === "Buy"
-                    ? "cart-outline"
-                    : m === "Sell"
-                      ? "pricetag-outline"
-                      : "storefront-outline"
-                }
-                size={15}
-                color={mode === m ? colors.bg : colors.muted}
-              />
               <Text
                 style={{
-                  color: mode === m ? colors.bg : colors.muted,
+                  color: mode === m ? colors.text : colors.muted,
                   fontSize: 12,
                   fontWeight: "700",
                 }}
               >
-                {m}
+                {m === "Sell" ? "Sell Produce" : m === "My Shop" ? "My Sales" : m}
               </Text>
             </Pressable>
           ))}
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Cart, ${count} items`}
-          onPress={() => setShowCart(true)}
-          style={styles.cart}
-        >
-          <Icon name="bag-outline" />
-          <Text style={s.badge}>{count}</Text>
-        </Pressable>
       </View>
       {mode === "Buy" ? (
         <>
-          <View style={[styles.search, { backgroundColor: colors.card, borderColor: colors.line }]}>
+          <View style={{ flexDirection: "row", gap: 8 }}><View style={[styles.search, { flex: 1 }, { backgroundColor: colors.card, borderColor: colors.line }]}>
             <Icon name="search" size={18} color={colors.muted} />
             <TextInput
               accessibilityLabel="Search products"
-              placeholder="Search products, seeds, equipment…"
+              placeholder="Search produce..."
               placeholderTextColor={colors.muted}
               value={query}
               onChangeText={setQuery}
@@ -193,7 +179,7 @@ export default function ShopTab() {
                 paddingVertical: 14,
               }}
             />
-          </View>
+          </View><Pressable accessibilityRole="button" accessibilityLabel="Filter produce" onPress={() => setShowFilters(true)} style={{ backgroundColor: colors.mint, borderRadius: 12, width: 40, alignItems: "center", justifyContent: "center" }}><Icon name="filter-outline" color="#FFFFFF" size={20} /></Pressable></View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -208,22 +194,9 @@ export default function ShopTab() {
               />
             ))}
           </ScrollView>
-          <ImageBackground
-            source={imageSource(photos.vegetables)}
-            style={[styles.banner, { backgroundColor: colors.card }]}
-            imageStyle={{ borderRadius: 16 }}
-          >
-            <View style={styles.bannerShade}>
-              <Label>GROW MORE, TOGETHER</Label>
-              <Text style={[s.title, { fontSize: 23, maxWidth: 210 }]}>
-                Good things start{"\n"}with your farm.
-              </Text>
-              <Text style={s.small}>Explore the sample marketplace</Text>
-            </View>
-          </ImageBackground>
           <View style={styles.grid}>
             {visible.map((p) => (
-              <View key={p.id} style={[styles.product, { backgroundColor: colors.card }]}>
+              <View key={p.id} style={[styles.product, { backgroundColor: colors.card, borderColor: colors.line }]}>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`View ${p.name}`}
@@ -235,9 +208,8 @@ export default function ShopTab() {
                     }
                     style={styles.productImage}
                   />
-                  <Text style={[styles.productBadge, { backgroundColor: colors.raised, color: colors.mint }]}>{p.badge}</Text>
+                  <Text style={[styles.productBadge, { backgroundColor: colors.raised, color: colors.mint }]}>{p.category}</Text>
                   <View style={{ padding: 12, gap: 4 }}>
-                    <Text style={[s.small, { fontSize: 10 }]}>{p.seller}</Text>
                     <Text
                       style={[
                         s.text,
@@ -246,8 +218,9 @@ export default function ShopTab() {
                     >
                       {p.name}
                     </Text>
+                    <Text style={[s.small, { fontSize: 10 }]}>{p.seller}</Text>
                     <Text style={{ color: colors.orange, fontSize: 10 }}>
-                      ★ 4.8 · Sample listing
+                      ★ 4.8
                     </Text>
                   </View>
                 </Pressable>
@@ -258,9 +231,9 @@ export default function ShopTab() {
                   ]}
                 >
                   <Text
-                    style={{ color: colors.mint, fontSize: 17, fontWeight: "800" }}
+                    style={{ color: colors.mint, fontSize: 12, fontWeight: "600" }}
                   >
-                    ${p.price.toFixed(2)}
+                    KES {p.price.toFixed(2)}
                   </Text>
                   <Pressable
                     accessibilityRole="button"
@@ -339,7 +312,7 @@ export default function ShopTab() {
               placeholder="e.g. Fresh maize · 10kg"
             />
             <Field
-              label="Price (USD)"
+              label="Price (KES)"
               value={price}
               onChangeText={setPrice}
               numeric
@@ -388,7 +361,7 @@ export default function ShopTab() {
                     </Text>
                   </View>
                 </View>
-                <Text style={s.badge}>${p.price.toFixed(2)}</Text>
+                <Text style={s.badge}>KES {p.price.toFixed(2)}</Text>
               </View>
             </Card>
           ))}
@@ -413,7 +386,7 @@ export default function ShopTab() {
                 <Text style={s.small}>Items sold</Text>
               </View>
               <View style={styles.stat}>
-                <Text style={[styles.statValue, { color: colors.mint }]}>${revenue.toFixed(2)}</Text>
+                <Text style={[styles.statValue, { color: colors.mint }]}>KES {revenue.toFixed(2)}</Text>
                 <Text style={s.small}>Revenue</Text>
               </View>
             </View>
@@ -446,7 +419,7 @@ export default function ShopTab() {
                     <View style={{ flex: 1 }}>
                       <Text style={s.text}>{p.name}</Text>
                       <Text style={s.small}>
-                        {p.category} · ${p.price.toFixed(2)}
+                        {p.category} · KES {p.price.toFixed(2)}
                       </Text>
                       <View style={[s.row, { marginTop: 4, gap: 8 }]}>
                         <Pill text={`Stock ${stockLeft}`} />
@@ -474,6 +447,7 @@ export default function ShopTab() {
           })}
         </>
       )}
+      <Sheet visible={showFilters} title="Filter produce" onClose={() => setShowFilters(false)}><View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{categories.map(item => <Pill key={item} text={item} active={category === item} onPress={() => { setCategory(item); setShowFilters(false); }} />)}</View></Sheet>
       <Sheet
         visible={showCart}
         title={`Your cart · ${count} items`}
@@ -485,7 +459,7 @@ export default function ShopTab() {
             <View style={s.card} key={p.id}>
               <Text style={s.sectionTitle}>{p.name}</Text>
               <View style={s.between}>
-                <Text style={s.text}>${(p.price * cart[p.id]).toFixed(2)}</Text>
+                <Text style={s.text}>KES {(p.price * cart[p.id]).toFixed(2)}</Text>
                 <View style={s.row}>
                   <IconButton
                     name="remove"
@@ -515,7 +489,7 @@ export default function ShopTab() {
           <>
             <View style={s.between}>
               <Text style={s.sectionTitle}>Total</Text>
-              <Text style={s.value}>${total.toFixed(2)}</Text>
+              <Text style={s.value}>KES {total.toFixed(2)}</Text>
             </View>
             <Button
               title="Proceed to checkout"
@@ -544,7 +518,7 @@ export default function ShopTab() {
               style={[styles.productImage, { height: 220, borderRadius: 14 }]}
             />
             <Text style={s.text}>Sold by {detail.seller}</Text>
-            <Text style={s.value}>${detail.price.toFixed(2)}</Text>
+            <Text style={s.value}>KES {detail.price.toFixed(2)}</Text>
             <Text style={s.small}>
               {detail.category} · Sample marketplace listing
             </Text>
@@ -560,7 +534,7 @@ export default function ShopTab() {
           </>
         )}
       </Sheet>
-    </Page>
+    </Page></SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
@@ -587,7 +561,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 14,
     backgroundColor: C.card,
-    borderRadius: 13,
+    borderRadius: 11,
+    borderWidth: 1,
   },
   banner: {
     height: 135,
@@ -609,8 +584,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     maxWidth: "49%",
+    borderWidth: 1,
   },
-  productImage: { width: "100%", height: 135, backgroundColor: C.raised },
+  productImage: { width: "100%", height: 110, backgroundColor: C.raised },
   productBadge: {
     position: "absolute",
     top: 8,

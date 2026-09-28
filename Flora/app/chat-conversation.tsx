@@ -1,153 +1,54 @@
 import { useChatHistory } from '@/contexts/chat-history-context';
-import { useLanguage } from '@/contexts/language-context';
-import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/contexts/theme-context';
+import { ScanProfilePrompt } from '@/components/agro/monitoring';
+import { Icon, IconButton, Text } from '@/components/agro/ui';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
-import { buildCareReply, careGuidance } from '@/services/care-guidance';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { careGuidance } from '@/services/care-guidance';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function ChatConversationScreen() {
-  const { tr } = useLanguage();
-  const { getSession, addExchange } = useChatHistory();
-  const params = useLocalSearchParams<{ sessionId?: string }>();
-  const session = params.sessionId ? getSession(params.sessionId) : undefined;
-  const mode = session?.agent === 'animal' ? 'animal' : 'crop';
-  const [input, setInput] = useState('');
-  const scroll = useRef<ScrollView>(null);
-
-  const ask = () => {
-    const question = input.trim();
-    if (!question || !session?.id) return;
-    addExchange(session.id, question, buildCareReply(mode));
-    setInput('');
-  };
-
-  return (
-    <View style={styles.screen}>
-      <View style={styles.headerRow}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons color="#FFFFFF" name="chevron-back" size={20} />
-        </Pressable>
-        <Text style={styles.title}>{tr('Chat with Agent')}</Text>
-      </View>
-
-      <ScrollView ref={scroll} onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: true })} contentContainerStyle={styles.chatContent} style={styles.chatScroll}>
-        {(session?.messages ?? []).map((msg) => (
-          <View key={msg.id} style={[styles.bubble, msg.role === 'user' ? styles.questionBubble : styles.responseBubble]}>
-            <Text style={styles.bubbleText}>{msg.text}</Text>
-            {msg.role === 'assistant' && (
-              <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/nearby-care', params: { category: careGuidance[mode].search } })} style={{ paddingVertical: 12 }}>
-                <Text style={[styles.bubbleText, { textDecorationLine: 'underline' }]}>Find nearby {mode === 'animal' ? 'vets & animal facilities' : 'plant doctors & crop facilities'}</Text>
-              </Pressable>
-            )}
-          </View>
-        ))}
-        {!session ? <Text style={styles.emptyText}>{tr('Chat not found. Start from Home to create a new conversation.')}</Text> : null}
-      </ScrollView>
-
-      <View style={styles.inputPanel}>
-        <TextInput
-          onChangeText={setInput}
-          onSubmitEditing={ask}
-          placeholder={tr('Ask anything...')}
-          placeholderTextColor="#B6C8EA"
-          style={styles.input}
-          value={input}
-        />
-        <Pressable onPress={ask} style={styles.sendBtn}>
-          <Ionicons color="#0E3CA7" name="arrow-up" size={14} />
-        </Pressable>
-      </View>
-    </View>
-  );
+function MessageImage({ uri, caption }: { uri: string; caption: string }) {
+  const [failed, setFailed] = useState(false);
+  const { colors } = useTheme();
+  return <View style={{ gap: 6 }}>{failed ? <Text style={{ color: colors.muted }}>Photo unavailable. Please attach it again.</Text> : <Image source={{ uri }} accessibilityLabel={caption} onError={() => setFailed(true)} resizeMode="contain" style={{ width: '100%', height: 220, borderRadius: 14, backgroundColor: colors.raised }} />}<Text style={{ fontSize: 11, color: colors.muted }}>{caption}</Text></View>;
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    backgroundColor: '#010B24',
-    flex: 1,
-    paddingTop: 48,
-  },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    marginBottom: 8,
-    paddingBottom: 10,
-    paddingHorizontal: 10,
-  },
-  backButton: {
-    alignItems: 'center',
-    borderRadius: 999,
-    height: 30,
-    justifyContent: 'center',
-    marginRight: 8,
-    width: 30,
-  },
-  title: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  chatScroll: {
-    flex: 1,
-  },
-  chatContent: {
-    paddingHorizontal: 10,
-    paddingBottom: 90,
-    rowGap: 10,
-  },
-  bubble: {
-    borderRadius: 12,
-    maxWidth: '82%',
-    padding: 10,
-  },
-  questionBubble: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#2A4EA3',
-    marginBottom: 6,
-  },
-  responseBubble: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#16326A',
-    borderColor: '#2A4F96',
-    borderWidth: 1,
-  },
-  bubbleText: {
-    color: '#EFF5FF',
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  emptyText: {
-    color: '#AFC4E8',
-    fontSize: 13,
-    marginTop: 6,
-  },
-  inputPanel: {
-    alignItems: 'center',
-    backgroundColor: '#16326A',
-    borderColor: '#24498F',
-    borderRadius: 26,
-    borderWidth: 1,
-    bottom: 16,
-    flexDirection: 'row',
-    left: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    position: 'absolute',
-    right: 12,
-  },
-  input: {
-    color: '#EAF2FF',
-    flex: 1,
-    fontSize: 14,
-    paddingVertical: 0,
-  },
-  sendBtn: {
-    alignItems: 'center',
-    backgroundColor: '#D7E8FF',
-    borderRadius: 18,
-    height: 36,
-    justifyContent: 'center',
-    width: 36,
-  },
-});
+export default function ChatConversationScreen() {
+  const { colors } = useTheme();
+  const { getSession, sendMessage, retryMessage } = useChatHistory();
+  const { sessionId } = useLocalSearchParams<{ sessionId?: string }>();
+  const session = sessionId ? getSession(sessionId) : undefined;
+  const guidance = careGuidance[session?.agent ?? 'crop'];
+  const [input, setInput] = useState('');
+  const [notice, setNotice] = useState('');
+  const scroll = useRef<ScrollView>(null);
+  const nearBottom = useRef(true);
+  const thinking = session?.messages.some(m => m.status === 'thinking') ?? false;
+  const ask = () => {
+    if (!input.trim() || !session || thinking) return;
+    nearBottom.current = true;
+    sendMessage(session.id, input.trim()); setInput('');
+  };
+  return <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: colors.bg }}><KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <View style={[styles.header, { borderBottomColor: colors.line }]}><IconButton name="arrow-back" label="Back" onPress={() => router.canGoBack() ? router.back() : router.replace('/home')} /><View style={{ flex: 1 }}><Text style={{ fontSize: 18, fontWeight: '700' }}>Flora AI</Text><Text style={{ fontSize: 11, color: colors.muted }}>{session?.agent === 'animal' ? 'Animal care' : 'Plant care'} · Preview assistant</Text></View><Icon name="sparkles-outline" /></View>
+    <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.messages} onScroll={event => { const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent; nearBottom.current = contentOffset.y + layoutMeasurement.height >= contentSize.height - 100; }} scrollEventThrottle={100} onContentSizeChange={() => { if (nearBottom.current) scroll.current?.scrollToEnd({ animated: true }); }}>
+      {session?.messages.map(msg => <View key={msg.id} style={[styles.message, { alignSelf: msg.role === 'user' ? 'flex-end' : 'stretch', backgroundColor: msg.role === 'user' ? colors.raised : colors.card, borderColor: colors.line, maxWidth: msg.role === 'user' ? '88%' : '100%' }]}>
+        <Text style={{ color: colors.mint, fontWeight: '700', fontSize: 12 }}>{msg.role === 'user' ? 'You' : 'Flora AI'}</Text>
+        {msg.status === 'thinking' ? <View accessibilityRole="progressbar" accessibilityLabel="AI is thinking" accessibilityLiveRegion="polite" style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12 }}><ActivityIndicator color={colors.mint} /><View><Text>AI is thinking…</Text><Text style={{ color: colors.muted, fontSize: 11 }}>Preparing your preview response</Text></View></View> : <>
+          {!!msg.text && <Text selectable style={{ fontSize: 14, lineHeight: 23 }}>{msg.text}</Text>}
+          {(msg.scan?.imageUri || msg.imageUri) && <MessageImage uri={(msg.scan?.imageUri || msg.imageUri)!} caption={msg.role === 'user' ? 'Your attached photo' : 'Photo from this check — not a diagnostic reference image'} />}
+          {msg.status === 'error' && <Pressable accessibilityRole="button" disabled={thinking} onPress={() => session && retryMessage(session.id, msg.id)} style={styles.action}><Icon name="refresh" size={17} /><Text style={{ color: colors.mint }}>Try again</Text></Pressable>}
+          {msg.role === 'assistant' && msg.status !== 'error' && <>
+            {msg.scan && <ScanProfilePrompt scan={msg.scan} />}
+            <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/nearby-care', params: { category: guidance.search } })} style={styles.action}><Icon name="location-outline" size={17} /><Text style={{ color: colors.mint }}>Find nearby care</Text></Pressable>
+            <Pressable accessibilityRole="link" onPress={() => void Linking.openURL(guidance.url).catch(() => setNotice('Could not open the guidance source.'))}><Text style={{ fontSize: 12, color: colors.mint, textDecorationLine: 'underline' }}>{guidance.source} ↗</Text></Pressable>
+          </>}
+        </>}
+      </View>)}
+      {!session && <Text>Chat not found. Start a conversation from the Scan tab.</Text>}
+      {!!notice && <Text accessibilityRole="alert">{notice}</Text>}
+    </ScrollView>
+    <View style={[styles.composer, { backgroundColor: colors.card, borderColor: colors.line }]}><TextInput accessibilityLabel="Message Flora AI" multiline maxLength={3000} value={input} onChangeText={setInput} placeholder="Ask a follow-up…" placeholderTextColor={colors.muted} style={{ flex: 1, color: colors.text, minHeight: 42, maxHeight: 120, padding: 10 }} /><Pressable accessibilityRole="button" accessibilityLabel="Send message" disabled={thinking || !session || !input.trim()} onPress={ask} style={[styles.send, { backgroundColor: colors.mint, opacity: thinking || !input.trim() ? 0.4 : 1 }]}><Icon name="arrow-up" color="#FFFFFF" size={21} /></Pressable></View>
+  </KeyboardAvoidingView></SafeAreaView>;
+}
+const styles = StyleSheet.create({ header: { flexDirection: 'row', alignItems: 'center', padding: 12, gap: 8, borderBottomWidth: 1 }, messages: { padding: 16, gap: 16, maxWidth: 760, width: '100%', alignSelf: 'center', paddingBottom: 24 }, message: { padding: 16, borderRadius: 20, borderWidth: 1, gap: 12 }, action: { flexDirection: 'row', alignItems: 'center', gap: 7, minHeight: 44 }, composer: { margin: 12, padding: 8, borderWidth: 1, borderRadius: 24, flexDirection: 'row', alignItems: 'flex-end', maxWidth: 736, width: '94%', alignSelf: 'center' }, send: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' } });

@@ -1,3 +1,4 @@
+import { MonitoringDashboard } from "@/components/agro/monitoring";
 import { Text } from "@/components/agro/ui";
 import { imageSource, photos } from "@/contexts/agro-context";
 import { useState } from "react";
@@ -169,30 +170,31 @@ export default function DashboardTab() {
         imageStyle={{ borderRadius: 17 }}
         style={[styles.hero, { backgroundColor: colors.card }]}
       >
-        <View style={[styles.heroOverlay, { backgroundColor: mode === "dark" ? "rgba(9,30,17,0.32)" : "rgba(255,255,255,0.28)" }]}>
+        <View style={[styles.heroOverlay, { backgroundColor: mode === "dark" ? "rgba(9,30,17,0.32)" : "rgba(9,30,17,0.48)" }]}>
           <View style={s.between}>
-            <Text style={s.badge}>DRONE VIEW · DEMO</Text>
+            <Text style={[s.badge, mode === "light" && { backgroundColor: "#E5E7EB" }]}>DRONE VIEW · DEMO</Text>
             <Pressable
               accessibilityRole="button"
               onPress={() => router.navigate("/current-updates")}
             >
-              <View style={[s.row, s.badge]}><Icon name="warning-outline" size={12} color={colors.orange} /><Text style={{ color: colors.orange, fontSize: 10, fontWeight: '700' }}>1 alert</Text></View>
+              <View style={[s.row, s.badge, mode === "light" && { backgroundColor: "#E5E7EB" }]}><Icon name="warning-outline" size={12} color={colors.orange} /><Text style={{ color: colors.orange, fontSize: 10, fontWeight: '700' }}>1 alert</Text></View>
             </Pressable>
           </View>
           <View style={s.between}>
             <View>
-              <Text style={s.title}>{farm.name}</Text>
-              <Text style={s.text}>{farm.detail}</Text>
+              <Text style={[s.title, mode === "light" && { color: "#FFFFFF" }]}>{farm.name}</Text>
+              <Text style={[s.text, mode === "light" && { color: "#FFFFFF" }]}>{farm.detail}</Text>
             </View>
             <View>
-              <Text style={[s.value, { color: colors.text, fontSize: 32 }] }>
+              <Text style={[s.value, { color: mode === "light" ? "#FFFFFF" : colors.text, fontSize: 32 }] }>
                 {farm.health}%
               </Text>
-              <Text style={s.small}>Health</Text>
+              <Text style={[s.small, mode === "light" && { color: "#FFFFFF" }]}>Health</Text>
             </View>
           </View>
         </View>
       </ImageBackground>
+      <MonitoringDashboard />
       <View style={styles.grid}>
         {(
           [
@@ -225,7 +227,7 @@ export default function DashboardTab() {
           <View key={item.label} style={[styles.metric, { backgroundColor: colors.card }] }>
             <View style={s.between}>
               <Icon name={item.icon} color={i === 1 ? colors.orange : colors.mint} />
-              <Text style={[s.badge, { fontSize: 9 }]}>{item.badge}</Text>
+              <Text style={[s.badge, { fontSize: 9 }, mode === "light" && { backgroundColor: "#E5E7EB" }]}>{item.badge}</Text>
             </View>
             <Text style={[s.value, i === 1 && { color: colors.orange }] }>
               {item.value}

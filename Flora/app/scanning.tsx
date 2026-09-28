@@ -1,24 +1,32 @@
+import { useChatHistory } from "@/contexts/chat-history-context";
+import { scanChatText } from "@/services/scan-chat";
 import { useAgentData } from '@/contexts/agent-data-context';
 import { useLanguage } from '@/contexts/language-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function ScanningScreen() {
   const { tr } = useLanguage();
   const { addQuickScan } = useAgentData();
   const params = useLocalSearchParams<{ mode?: string }>();
   const mode = params.mode === 'animal' ? 'animal' : 'crop';
-  const [scanDone, setScanDone] = useState(false);
+  const { startConversation } = useChatHistory();
+  const [busy, setBusy] = useState(false);
 
-  const runScan = async () => {
-    await addQuickScan(mode);
-    setScanDone(true);
+  const runScan = () => {
+    if (busy) return;
+    setBusy(true);
+    const sessionId = startConversation(mode, `Run a preview ${mode === 'animal' ? 'animal' : 'plant'} check.`, async () => {
+      const scan = await addQuickScan(mode);
+      return { text: scanChatText(scan), scan };
+    });
+    router.replace({ pathname: '/chat-conversation', params: { sessionId } });
   };
 
   return (
-    <View style={styles.screen}>
+    <ScrollView contentContainerStyle={styles.screen}>
       <View style={styles.headerRow}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Ionicons color="#EAF2FF" name="chevron-back" size={20} />
@@ -39,17 +47,17 @@ export default function ScanningScreen() {
           : tr('Point camera at the animal and keep it steady for health cues.')}
       </Text>
 
-      <Pressable onPress={runScan} style={styles.scanBtn}>
+      <Pressable disabled={busy} onPress={runScan} style={styles.scanBtn}>
         <Text style={styles.scanBtnText}>{tr('Analyze Current Frame')}</Text>
       </Pressable>
 
-      {scanDone ? <Text style={styles.doneText}>{tr('Scan complete. Dashboard and Alerts have been updated.')}</Text> : null}
-    </View>
+      <Text style={styles.doneText}>Preview results will appear in the Flora AI chat.</Text>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { alignItems: 'center', backgroundColor: '#010B24', flex: 1, paddingHorizontal: 16, paddingTop: 56 },
+  screen: { alignItems: 'center', backgroundColor: '#010B24', flexGrow: 1, paddingBottom: 30, paddingHorizontal: 16, paddingTop: 56 },
   headerRow: { alignItems: 'center', flexDirection: 'row', marginBottom: 18, width: '100%' },
   backButton: { alignItems: 'center', height: 28, justifyContent: 'center', marginRight: 6, width: 28 },
   title: { color: '#EAF2FF', fontSize: 26, fontWeight: '800' },

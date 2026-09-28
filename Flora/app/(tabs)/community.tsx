@@ -1,3 +1,6 @@
+import { useChatHistory } from "@/contexts/chat-history-context";
+import { buildCareReply } from "@/services/care-guidance";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   useEffect,
@@ -179,6 +182,7 @@ function StoryComposer({ visible, onClose, onPreview }: { visible: boolean; onCl
 ===================================================== */
 
 export default function CommunityTab() {
+  const { createSession } = useChatHistory();
   const { colors } = useTheme();
   const {
     posts,
@@ -199,6 +203,14 @@ export default function CommunityTab() {
   /* =====================================================
      SCREEN STATE
   ===================================================== */
+
+  const [discussionQuery, setDiscussionQuery] = useState("");
+  const [topic, setTopic] = useState("All Posts");
+  const visiblePosts = posts.filter(post => {
+    const content = `${post.text} ${post.name} ${post.tag}`.toLowerCase();
+    const matchesTopic = topic === "All Posts" || (topic === "Animal Health" ? /animal|goat|cattle|chicken|livestock/.test(content) : topic === "Market" ? /market|sell|price|harvest/.test(content) : /crop|maize|leaf|leaves|seed|field/.test(content));
+    return matchesTopic && content.includes(discussionQuery.toLowerCase().trim());
+  });
 
   const [screen, setScreen] =
     useState<CommunityScreen>("feed");
@@ -808,10 +820,16 @@ export default function CommunityTab() {
           </Text>
         </View>
 
-        <Text style={s.badge}>
-          {post.tag}
-        </Text>
+        <IconButton name="paper-plane-outline" label="Share discussion" onPress={() => void sharePost(post)} />
       </View>
+
+      {/* POST CAPTION */}
+
+      {!!post.text && (
+        <Text style={[styles.postCaption, { color: colors.text }]}>
+          {post.text}
+        </Text>
+      )}
 
       {/* POST PHOTO */}
 
@@ -832,14 +850,6 @@ export default function CommunityTab() {
           uri={post.videoUri}
           height={350}
         />
-      )}
-
-      {/* POST CAPTION */}
-
-      {!!post.text && (
-        <Text style={[styles.postCaption, { color: colors.text }]}>
-          {post.text}
-        </Text>
       )}
 
       {/* POST ACTIONS */}
@@ -867,14 +877,14 @@ export default function CommunityTab() {
             <Icon
               name={
                 post.liked
-                  ? "heart"
-                  : "heart-outline"
+                  ? "thumbs-up"
+                  : "thumbs-up-outline"
               }
-              size={23}
+              size={16}
               color={
                 post.liked
                   ? COLORS.red
-                  : C.text
+                  : colors.muted
               }
             />
 
@@ -895,7 +905,7 @@ export default function CommunityTab() {
           >
             <Icon
               name="chatbubble-outline"
-              size={22}
+              size={16}
               color={colors.text}
             />
 
@@ -906,15 +916,8 @@ export default function CommunityTab() {
 
         </View>
 
-        {/* SHARE */}
-
-        <IconButton
-          name="share-social-outline"
-          label="Share post"
-          onPress={() =>
-            void sharePost(post)
-          }
-        />
+        <Pressable accessibilityRole="button" accessibilityLabel="Share post" onPress={() => void sharePost(post)} style={styles.postAction}><Icon name="share-outline" size={15} color={colors.muted} /><Text style={{ fontSize: 11 }}>Share</Text></Pressable>
+        <Pressable accessibilityRole="button" onPress={() => { const agent = post.tag === "Animal Health" ? "animal" : "crop"; const sessionId = createSession(agent, post.text, buildCareReply(agent)); router.push({ pathname: "/chat-conversation", params: { sessionId } }); }} style={{ backgroundColor: colors.raised, borderRadius: 7, padding: 8 }}><Text style={{ color: colors.mint, fontSize: 10, fontWeight: "700" }}>Ask Expert</Text></Pressable>
 
       </View>
     </View>
@@ -1632,7 +1635,7 @@ export default function CommunityTab() {
 
             <Icon
               name="grid-outline"
-              size={23}
+              size={16}
               color={colors.text}
             />
 
@@ -1747,204 +1750,13 @@ export default function CommunityTab() {
         showsVerticalScrollIndicator={false}
       >
 
-        {/* =============================================
-            STORIES / STATUS
-        ============================================= */}
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={
-            styles.storiesContainer
-          }
-          style={styles.storiesScroll}
-        >
-
-          {/* YOUR STORY */}
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Your story"
-            onPress={openStoryComposer}
-            style={styles.story}
-          >
-
-            <View style={styles.myStoryCircle}>
-
-              <Image
-                source={imageSource(
-                  avatar(12)
-                )}
-                style={styles.myStoryImage}
-              />
-
-              <View style={[styles.storyPlus, { borderColor: colors.bg, backgroundColor: colors.mint }]}>
-
-                <Icon
-                  name="add"
-                  size={17}
-                  color="#FFFFFF"
-                />
-
-              </View>
-
-            </View>
-
-            <Text style={[styles.storyLabel, { color: colors.text }]}>
-              Your story
-            </Text>
-
-          </Pressable>
-
-          {/* OTHER FARMERS' STORIES */}
-
-          {[
-            "Kofi A.",
-            "Aisha B.",
-            "Bola F.",
-            "Musa K.",
-          ].map((name, i) => (
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                `View ${name}'s story`
-              }
-              key={name}
-              onPress={() => setStory(name)}
-              style={styles.story}
-            >
-
-              <View style={styles.storyRing}>
-
-                <Image
-                  source={imageSource(
-                    avatar(
-                      [11, 47, 13, 12][i]
-                    )
-                  )}
-                  style={[styles.storyImage, { borderColor: colors.bg, backgroundColor: colors.raised }]}
-                />
-
-              </View>
-
-              <Text
-                style={[styles.storyLabel, { color: colors.text }]}
-                numberOfLines={1}
-              >
-                {name}
-              </Text>
-
-            </Pressable>
-
-          ))}
-
-        </ScrollView>
-
-        {/* =============================================
-            ACTION ICONS BELOW STORIES
-        ============================================= */}
-
-        <View style={[styles.postsHeader, { backgroundColor: colors.bg, borderColor: colors.line }]}>
-
-          <Text style={[styles.postsTitle, { color: colors.text }]}>
-            Posts
-          </Text>
-
-          <View style={styles.postsHeaderActions}>
-
-            {/* SHORT VIDEOS */}
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Watch short videos"
-              onPress={() =>
-                openShortVideos("feed")
-              }
-              style={[styles.headerIconButton, { backgroundColor: colors.raised }]}
-            >
-
-              <Icon
-                name="play-circle-outline"
-                size={28}
-                color={colors.text}
-              />
-
-            </Pressable>
-
-            {/* ADD POST */}
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Create a post"
-              onPress={openCreatePost}
-              style={[styles.headerIconButton, { backgroundColor: colors.raised }]}
-            >
-
-              <Icon
-                name="add"
-                size={29}
-                color={colors.text}
-              />
-
-            </Pressable>
-
-          </View>
-
+        <View style={{ backgroundColor: colors.card, padding: 19, gap: 12, borderBottomWidth: 1, borderBottomColor: colors.line, marginBottom: 14 }}>
+          <View style={s.between}><Text style={{ fontFamily: "serif", fontSize: 21, fontWeight: "700" }}>Farmer Community</Text><Pressable accessibilityRole="button" accessibilityLabel="Create a post" onPress={openCreatePost} style={{ backgroundColor: colors.mint, width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" }}><Icon name="add" color="#FFFFFF" size={22} /></Pressable></View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 7, paddingHorizontal: 11, borderRadius: 11, backgroundColor: colors.raised }}><Icon name="search" size={15} color={colors.muted} /><TextInput accessibilityLabel="Search discussions" placeholder="Search discussions..." placeholderTextColor={colors.muted} value={discussionQuery} onChangeText={setDiscussionQuery} style={{ flex: 1, paddingVertical: 8, color: colors.text, fontSize: 12 }} /></View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 7 }}>{["All Posts", "Crop Issues", "Animal Health", "Market"].map(item => <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: topic === item }} onPress={() => setTopic(item)} style={{ backgroundColor: topic === item ? colors.mint : colors.raised, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20 }}><Text style={{ fontSize: 10, fontWeight: "600", color: topic === item ? "#FFFFFF" : colors.text }}>{item}</Text></Pressable>)}</ScrollView>
         </View>
-
-        {/* =============================================
-            DISCOVER FARMERS
-        ============================================= */}
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Discover farmers"
-          onPress={() => {
-            setFarmerSearch("");
-
-            setScreen("discover");
-          }}
-          style={[styles.discoverBanner, { backgroundColor: colors.card }]}
-        >
-
-          <View style={[styles.discoverBannerIcon, { backgroundColor: colors.raised }] }>
-
-            <Icon
-              name="people-outline"
-              size={25}
-              color={C.mint}
-            />
-
-          </View>
-
-          <View style={{ flex: 1 }}>
-
-            <Text style={[styles.discoverBannerTitle, { color: colors.text }] }>
-              Discover Farmers
-            </Text>
-
-            <Text style={[styles.discoverBannerSubtitle, { color: colors.muted }] }>
-              Find farmers, follow them and explore
-              their posts.
-            </Text>
-
-          </View>
-
-          <Icon
-            name="chevron-forward"
-            size={21}
-            color={C.muted}
-          />
-
-        </Pressable>
-
-        {/* =============================================
-            COMMUNITY POSTS
-        ============================================= */}
-
-        {posts.map(renderPost)}
-
+        <View style={{ paddingHorizontal: 15 }}>{visiblePosts.map(renderPost)}</View>
+        {posts.length > 0 && visiblePosts.length === 0 && <Text style={{ padding: 20, color: colors.muted }}>No discussions match your search.</Text>}
         {/* EMPTY FEED */}
 
         {posts.length === 0 && (
@@ -1975,6 +1787,7 @@ export default function CommunityTab() {
 
         )}
 
+        <View style={{ flexDirection: "row", justifyContent: "center", padding: 16, gap: 12 }}><IconButton name="people-outline" label="Discover farmers" onPress={() => setScreen("discover")} /><IconButton name="play-circle-outline" label="Watch short videos" onPress={() => openShortVideos("feed")} /><IconButton name="camera-outline" label="Create story" onPress={openStoryComposer} /></View>
         {!!error && (
 
           <Text style={styles.errorText}>
@@ -1992,7 +1805,7 @@ export default function CommunityTab() {
   ===================================================== */
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
+    <SafeAreaView edges={["top"]} style={[styles.container, { backgroundColor: colors.card }]}>
 
       {renderScreen()}
 
@@ -2057,7 +1870,7 @@ export default function CommunityTab() {
       {story ? <StoryViewer name={story} mediaUri={storyMedia} onClose={() => { setStory(undefined); setStoryMedia(undefined); }} /> : null}
       <StoryComposer visible={storyComposer} onClose={() => setStoryComposer(false)} onPreview={(uri) => { setStoryComposer(false); setStoryMedia(uri); setStory("Your story"); }} />
 
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -2324,7 +2137,10 @@ const styles = StyleSheet.create({
 
     overflow: "hidden",
 
-    marginBottom: 9,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderRadius: 15,
+    padding: 14,
   },
 
   postHeader: {
@@ -2334,7 +2150,7 @@ const styles = StyleSheet.create({
 
     gap: 10,
 
-    padding: 13,
+    padding: 0,
   },
 
   avatar: {
@@ -2364,7 +2180,8 @@ const styles = StyleSheet.create({
   postImage: {
     width: "100%",
 
-    height: 310,
+    height: 155,
+    borderRadius: 12,
 
     backgroundColor: C.raised,
   },
@@ -2383,9 +2200,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
 
-    paddingHorizontal: 14,
     paddingTop: 12,
-    paddingBottom: 8,
+    paddingBottom: 14,
   },
 
   postActions: {
@@ -2394,8 +2210,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
 
-    paddingHorizontal: 12,
-    paddingBottom: 8,
+    paddingTop: 8,
   },
 
   postActionsLeft: {
@@ -2403,7 +2218,7 @@ const styles = StyleSheet.create({
 
     alignItems: "center",
 
-    gap: 14,
+    gap: 12,
   },
 
   postAction: {
@@ -2608,7 +2423,8 @@ const styles = StyleSheet.create({
   editorImage: {
     width: "100%",
 
-    height: 310,
+    height: 155,
+    borderRadius: 12,
 
     backgroundColor: "#000000",
   },
@@ -2660,7 +2476,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 12,
 
-    padding: 13,
+    padding: 0,
 
     borderWidth: 1,
     borderColor: C.line,

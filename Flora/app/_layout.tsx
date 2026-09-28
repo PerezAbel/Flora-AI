@@ -1,3 +1,4 @@
+import { MonitoringProvider } from "@/contexts/monitoring-context";
 import { AgroProvider } from "@/contexts/agro-context";
 import { Stack } from "expo-router";
 import { LanguageProvider } from "@/contexts/language-context";
@@ -12,6 +13,7 @@ export default function RootLayout() {
         <AgroProvider>
         <AgentDataProvider>
           <ChatHistoryProvider>
+          <MonitoringProvider>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="index" />
               <Stack.Screen name="welcome" options={{ animation: "fade" }} />
@@ -38,6 +40,7 @@ export default function RootLayout() {
               <Stack.Screen name="live-monitoring" />
               <Stack.Screen name="chat-conversation" />
             </Stack>
+          </MonitoringProvider>
           </ChatHistoryProvider>
         </AgentDataProvider>
         </AgroProvider>

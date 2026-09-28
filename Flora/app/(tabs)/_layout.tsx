@@ -62,74 +62,16 @@ export default function TabLayout() {
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >
-      {/* <Tabs.Screen
-        name="community"
-        options={{
-          title: "Feed",
-          tabBarLabel: "Feed",
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="home" color={color} size={size} />
-          ),
-        }}
-      /> */}
-      <Tabs.Screen name="community" options={{ href: null }} />
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: "FARM",
-          tabBarLabel: "Farm",
-          header: () => <Header title="Dashboard" eyebrow="" />,
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="grid" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: "Farm AI",
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="sparkles" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="shop"
-        options={{
-          title: "Market",
-          tabBarLabel: "Shop",
-          header: () => <Header title="Market" eyebrow="" />,
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="bag-handle" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="nearby-care"
-        options={{
-          title: "Nearby Care",
-          tabBarLabel: "Nearby Care",
-          header: () => <Header title="Vets & Care" eyebrow="" />,
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="medical-outline" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="current-updates"
-        options={{
-          title: "Notifications",
-          tabBarLabel: "Alerts",
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="notifications" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{ title: "My account", href: null }}
-      />
+      <Tabs.Screen name="dashboard" options={{ title: "Home", tabBarIcon: ({ color, size }) => <Icon name="home-outline" color={color} size={size} /> }} />
+      <Tabs.Screen name="home" options={{ title: "Scan", headerShown: false, tabBarIcon: () => <View style={{ width: 44, height: 44, marginTop: -18, borderRadius: 15, backgroundColor: colors.mint, alignItems: "center", justifyContent: "center" }}><Icon name="scan" color="#FFFFFF" size={25} /></View> }} />
+      <Tabs.Screen name="shop" options={{ title: "Marketplace", tabBarLabel: "Market", headerShown: false, tabBarIcon: ({ color, size }) => <Icon name="bag-handle-outline" color={color} size={size} /> }} />
+      <Tabs.Screen name="community" options={{ title: "Farmer Community", tabBarLabel: "Community", headerShown: false, tabBarIcon: ({ color, size }) => <Icon name="people-outline" color={color} size={size} /> }} />
+      <Tabs.Screen name="profile" options={{ title: "Profile", headerShown: false, tabBarIcon: ({ color, size }) => <Icon name="person-outline" color={color} size={size} /> }} />
+      {/* Vet tab disabled for now; keep the screen available for existing links.
+      <Tabs.Screen name="nearby-care" options={{ title: "Vets & Care", tabBarLabel: "Nearby Care" }} />
+      */}
+      <Tabs.Screen name="nearby-care" options={{ href: null }} />
+      <Tabs.Screen name="current-updates" options={{ title: "Notifications", href: null }} />
     </Tabs>
   );
 }
