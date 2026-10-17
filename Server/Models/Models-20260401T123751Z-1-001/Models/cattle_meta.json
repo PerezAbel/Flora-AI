@@ -1,0 +1,22 @@
+{
+  "animal": "cattle",
+  "classes": [
+    "foot_and_mouth",
+    "lumpy_skin",
+    "normal_skin"
+  ],
+  "num_classes": 3,
+  "img_size": 224,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "backbone": "efficientnetv2_rw_s",
+  "dropout": 0.4
+}

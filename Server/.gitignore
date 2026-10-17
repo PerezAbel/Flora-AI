@@ -1,0 +1,2 @@
+# Keep trained model weights locally; distribute them separately from source.
+*.pth
